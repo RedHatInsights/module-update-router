@@ -1,0 +1,19 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: app
+  namespace: module-update-router
+spec:
+  selector:
+    app: module-update-router
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: module-update-router
+    spec:
+      containers:
+        - name: module-update-router
+          image: quay.io/cloudservices/module-update-router
+          ports:
+            - containerPort: 8080
