@@ -39,8 +39,7 @@ objects:
       name: module-update-router
     spec:
       selector:
-        matchLabels:
-          app: module-update-router
+        app: module-update-router
       ports:
         - port: 80
           targetPort: 8080
