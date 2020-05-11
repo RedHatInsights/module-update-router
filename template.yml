@@ -27,6 +27,9 @@ objects:
           labels:
             app: module-update-router
         spec:
+          imagePullSecrets:
+            - name: quay-cloudservices-pull
+            - name: rh-registry-pull
           containers:
             - name: module-update-router
               image: ${IMAGE}:${IMAGE_TAG}
