@@ -18,21 +18,21 @@ import (
 // multiplexer for routing HTTP requests to appropriate handlers and a database
 // handle for looking up application data.
 type Server struct {
-	mux *http.ServeMux
-	db  *DB
-	cfg Config
+	mux  *http.ServeMux
+	db   *DB
+	addr string
 }
 
 // NewServer creates a new instance of the application, configured per config.
-func NewServer(config Config) (*Server, error) {
-	db, err := Open(config.DBPath)
+func NewServer(addr, dbpath string) (*Server, error) {
+	db, err := Open(dbpath)
 	if err != nil {
 		return nil, err
 	}
 	srv := &Server{
-		mux: &http.ServeMux{},
-		db:  db,
-		cfg: config,
+		mux:  &http.ServeMux{},
+		db:   db,
+		addr: addr,
 	}
 	srv.routes()
 	return srv, nil
@@ -45,7 +45,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // ListenAndServe simply calls http.ListenAndServe with the configured TCP
 // address and s as the handler.
 func (s Server) ListenAndServe() error {
-	return http.ListenAndServe(s.cfg.Addr, s)
+	return http.ListenAndServe(s.addr, s)
 }
 
 // Close closes the database handle.

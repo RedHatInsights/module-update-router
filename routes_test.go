@@ -41,7 +41,7 @@ func TestRouter(t *testing.T) {
 	}
 
 	// Bootstrap a server and seed the database
-	srv, err := NewServer(DefaultConfig())
+	srv, err := NewServer(":8080", "file::memory:?cache=shared")
 	if err != nil {
 		t.Fatal(err)
 	}

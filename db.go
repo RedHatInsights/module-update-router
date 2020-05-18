@@ -101,10 +101,10 @@ func (db *DB) Insert(moduleName, accountID string) error {
 //
 // Example:
 //
-// modfoo,123
-// modfoo,345
-// modboo,123
-// modboo,678
+//   modfoo,123
+//   modfoo,345
+//   modboo,123
+//   modboo,678
 func (db *DB) Load(data string) error {
 	r := csv.NewReader(strings.NewReader(data))
 
