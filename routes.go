@@ -24,8 +24,9 @@ type Server struct {
 	addr string
 }
 
-// NewServer creates a new instance of the application, configured per config.
-func NewServer(addr, dbpath string) (*Server, error) {
+// NewServer creates a new instance of the application, configured with the
+// provided addr, dbpath, and API root.
+func NewServer(addr, dbpath, apiroot string) (*Server, error) {
 	db, err := Open(dbpath)
 	if err != nil {
 		return nil, err
@@ -35,7 +36,7 @@ func NewServer(addr, dbpath string) (*Server, error) {
 		db:   db,
 		addr: addr,
 	}
-	srv.routes()
+	srv.routes(apiroot)
 	return srv, nil
 }
 
@@ -54,10 +55,10 @@ func (s *Server) Close() error {
 	return s.db.Close()
 }
 
-// routes registers handlerFuncs for the server paths.
-func (s *Server) routes() {
+// routes registers handlerFuncs for the server paths under the given prefix.
+func (s *Server) routes(prefix string) {
 	s.mux.HandleFunc("/ping", s.handlePing())
-	s.mux.HandleFunc("/api/v1/", s.metrics(s.requestID(s.log(s.auth(s.handleAPI("/api/v1/"))))))
+	s.mux.HandleFunc(prefix+"/", s.metrics(s.requestID(s.log(s.auth(s.handleAPI(prefix))))))
 }
 
 // handlePing creates an http.HandlerFunc that handles the health check endpoint

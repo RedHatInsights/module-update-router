@@ -30,18 +30,18 @@ func TestRouter(t *testing.T) {
 		},
 		{
 			desc:  "want /testing",
-			input: request{http.MethodGet, "/api/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/testing"}`},
 		},
 		{
 			desc:  "want /release",
-			input: request{http.MethodGet, "/api/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540156", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540156", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/release"}`},
 		},
 	}
 
 	// Bootstrap a server and seed the database
-	srv, err := NewServer(":8080", "file::memory:?cache=shared")
+	srv, err := NewServer(":8080", "file::memory:?cache=shared", "/api/module-update-router/v1")
 	if err != nil {
 		t.Fatal(err)
 	}

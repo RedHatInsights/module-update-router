@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 
 	"github.com/peterbourgon/ff/v3"
@@ -14,11 +15,17 @@ import (
 
 func main() {
 	var (
-		addr   string // addr is the TCP address and port the application listens on
-		maddr  string // maddr is the TCP address and port the metrics HTTP server listens on
-		dbpath string // dbpath is a file path to the database
-		env    string // env determines operation mode (log formatters, etc.)
-		dbdata string // initial data to populate database
+		addr       string // addr is the TCP address and port the application listens on
+		maddr      string // maddr is the TCP address and port the metrics HTTP server listens on
+		dbpath     string // dbpath is a file path to the database
+		env        string // env determines operation mode (log formatters, etc.)
+		dbdata     string // initial data to populate database
+		pathprefix string // API path prefix
+		appname    string // API path app name
+	)
+
+	const (
+		apiversion = "v1"
 	)
 
 	fs := flag.NewFlagSet("module-update-router", flag.ExitOnError)
@@ -27,6 +34,8 @@ func main() {
 	fs.StringVar(&dbpath, "db-path", "file::memory:?cache=shared", "path to database")
 	fs.StringVar(&env, "environment", "development", "operation mode")
 	fs.StringVar(&dbdata, "db-data", "", "initial database seed data")
+	fs.StringVar(&pathprefix, "path-prefix", "/api", "API path prefix")
+	fs.StringVar(&appname, "app-name", "", "name component for the API prefix")
 
 	ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix())
 
@@ -37,7 +46,7 @@ func main() {
 		log.SetFormatter(&log.TextFormatter{})
 	}
 
-	srv, err := NewServer(addr, dbpath)
+	srv, err := NewServer(addr, dbpath, path.Join(pathprefix, appname, apiversion))
 	if err != nil {
 		log.Fatal(err)
 	}
