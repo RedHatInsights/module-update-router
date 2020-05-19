@@ -31,12 +31,12 @@ func TestRouter(t *testing.T) {
 		{
 			desc:  "want /testing",
 			input: request{http.MethodGet, "/api/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
-			want:  response{http.StatusOK, "/testing"},
+			want:  response{http.StatusOK, `{"url":"/testing"}`},
 		},
 		{
 			desc:  "want /release",
 			input: request{http.MethodGet, "/api/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540156", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
-			want:  response{http.StatusOK, "/release"},
+			want:  response{http.StatusOK, `{"url":"/release"}`},
 		},
 	}
 

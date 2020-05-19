@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"path"
 	"time"
@@ -81,6 +82,9 @@ func (s *Server) handleAPI(prefix string) http.HandlerFunc {
 
 // handleChannel creates an http.HandlerFunc for the API endpoint /channel.
 func (s *Server) handleChannel() http.HandlerFunc {
+	type response struct {
+		URL string `json:"url"`
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		module := r.URL.Query().Get("module")
 		if len(module) < 1 {
@@ -89,16 +93,26 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			http.Error(w, msg, code)
 		}
 
-		body := "/release"
+		resp := response{
+			URL: "/release",
+		}
 		id := identity.Get(r.Context())
 		count, err := s.db.Count(module, id.Identity.AccountNumber)
 		if err != nil {
 			log.Error(err)
 		}
 		if count > 0 {
-			body = "/testing"
+			resp.URL = "/testing"
 		}
-		w.Write([]byte(body))
+		data, err := json.Marshal(resp)
+		if err != nil {
+			log.Error(err)
+			code := http.StatusInternalServerError
+			msg := http.StatusText(code) + err.Error()
+			http.Error(w, msg, code)
+			return
+		}
+		w.Write(data)
 	}
 }
 
