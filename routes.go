@@ -88,9 +88,8 @@ func (s *Server) handleChannel() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		module := r.URL.Query().Get("module")
 		if len(module) < 1 {
-			code := http.StatusBadRequest
-			msg := http.StatusText(code) + ": Missing required parameter: module"
-			http.Error(w, msg, code)
+			formatJSONError(w, http.StatusBadRequest, "missing required paramenter: 'module'")
+			return
 		}
 
 		resp := response{
@@ -106,10 +105,7 @@ func (s *Server) handleChannel() http.HandlerFunc {
 		}
 		data, err := json.Marshal(resp)
 		if err != nil {
-			log.Error(err)
-			code := http.StatusInternalServerError
-			msg := http.StatusText(code) + err.Error()
-			http.Error(w, msg, code)
+			formatJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		w.Write(data)
