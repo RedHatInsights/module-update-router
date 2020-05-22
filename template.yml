@@ -61,3 +61,4 @@ objects:
     data:
       PATH_PREFIX: /api
       APP_NAME: module-update-router
+      LOG_LEVEL: trace
