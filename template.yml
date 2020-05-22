@@ -33,6 +33,9 @@ objects:
           containers:
             - name: module-update-router
               image: ${IMAGE}:${IMAGE_TAG}
+              envFrom:
+                - configMapRef:
+                    name: module-update-router-stage-config
               ports:
                 - containerPort: 8080
                 - containerPort: 2112
