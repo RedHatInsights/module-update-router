@@ -16,6 +16,7 @@ import (
 func main() {
 	var (
 		addr       string // addr is the TCP address and port the application listens on
+		logLevel   string // log level
 		maddr      string // maddr is the TCP address and port the metrics HTTP server listens on
 		dbpath     string // dbpath is a file path to the database
 		env        string // env determines operation mode (log formatters, etc.)
@@ -29,6 +30,7 @@ func main() {
 	)
 
 	fs := flag.NewFlagSet("module-update-router", flag.ExitOnError)
+	fs.StringVar(&logLevel, "log-level", "info", "default logging level")
 	fs.StringVar(&addr, "addr", ":8080", "app listen address")
 	fs.StringVar(&maddr, "maddr", ":2112", "metrics listen addr")
 	fs.StringVar(&dbpath, "db-path", "file::memory:?cache=shared", "path to database")
@@ -45,6 +47,12 @@ func main() {
 	default:
 		log.SetFormatter(&log.TextFormatter{})
 	}
+
+	lvl, err := log.ParseLevel(logLevel)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetLevel(lvl)
 
 	srv, err := NewServer(addr, dbpath, path.Join(pathprefix, appname, apiversion))
 	if err != nil {
