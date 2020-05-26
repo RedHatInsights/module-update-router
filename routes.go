@@ -133,14 +133,15 @@ func (s *Server) log(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		log.WithFields(logrus.Fields{
-			"ident":      r.Host,
-			"method":     r.Method,
-			"referer":    r.Referer(),
-			"url":        r.URL.String(),
-			"user-agent": r.UserAgent(),
-			"status":     rr.Code,
-			"response":   rr.Body.String(),
-			"duration":   time.Since(start),
+			"ident":          r.Host,
+			"method":         r.Method,
+			"referer":        r.Referer(),
+			"url":            r.URL.String(),
+			"user-agent":     r.UserAgent(),
+			"status":         rr.Code,
+			"response":       rr.Body.String(),
+			"account-number": identity.Get(r.Context()).Identity.AccountNumber,
+			"duration":       time.Since(start),
 		}).Log(level)
 	}
 }
