@@ -87,11 +87,6 @@ func (s *Server) handleChannel() http.HandlerFunc {
 		URL string `json:"url"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.WithFields(log.Fields{
-			"path":       r.URL.Path,
-			"query":      r.URL.Query(),
-			"request-id": r.Header.Get("Request-ID"),
-		}).Trace("recv")
 		module := r.URL.Query().Get("module")
 		if len(module) < 1 {
 			formatJSONError(w, http.StatusBadRequest, "missing required paramenter: 'module'")
@@ -115,10 +110,6 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			return
 		}
 		w.Write(data)
-		log.WithFields(log.Fields{
-			"request-id": r.Header.Get("Request-ID"),
-			"response":   resp,
-		}).Trace("sent")
 	}
 }
 
