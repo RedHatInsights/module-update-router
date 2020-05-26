@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestRouter(t *testing.T) {
@@ -57,13 +59,10 @@ func TestRouter(t *testing.T) {
 			}
 			rr := httptest.NewRecorder()
 			srv.ServeHTTP(rr, req)
+			got := response{rr.Code, rr.Body.String()}
 
-			if rr.Code != test.want.code {
-				t.Errorf("%v != %v", rr.Code, test.want.code)
-			}
-
-			if rr.Body.String() != test.want.body {
-				t.Errorf("%+v != %+v", rr.Body.String(), test.want.body)
+			if !cmp.Equal(got, test.want, cmp.AllowUnexported(response{})) {
+				t.Errorf("%#v != %#v", got, test.want)
 			}
 		})
 	}
