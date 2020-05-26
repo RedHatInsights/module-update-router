@@ -110,10 +110,6 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			return
 		}
 		w.Write(data)
-		log.WithFields(log.Fields{
-			"account-number": id.Identity.AccountNumber,
-			"response":       resp,
-		}).Log(log.TraceLevel)
 	}
 }
 
@@ -145,6 +141,7 @@ func (s *Server) log(next http.HandlerFunc) http.HandlerFunc {
 			"status":     rr.Code,
 			"response":   rr.Body.String(),
 			"duration":   time.Since(start),
+			"request-id": r.Header.Get("X-Request-Id"),
 		}).Log(level)
 	}
 }
