@@ -110,6 +110,10 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			return
 		}
 		w.Write(data)
+		log.WithFields(log.Fields{
+			"account-number": id.Identity.AccountNumber,
+			"response":       resp,
+		}).Log(log.TraceLevel)
 	}
 }
 
