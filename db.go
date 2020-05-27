@@ -7,23 +7,22 @@ import (
 	"io"
 	"strings"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
-
-var schema = [...]string{
-	`CREATE TABLE IF NOT EXISTS "accounts_modules" (
-		"module_name"	TEXT,
-		"account_id"	TEXT,
-		PRIMARY KEY("module_name","account_id")
-	)`,
-}
 
 // DB wraps a sql.DB handle, providing an application-specific, higher-level API
 // around the standard sql.DB interface.
 type DB struct {
 	handle     *sql.DB
 	statements map[string]*sql.Stmt
+	driverName string
 }
 
 // Open opens a database specified by dataSourceName. The only supported driver
@@ -41,20 +40,10 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 		return nil, err
 	}
 
-	if strings.Contains(dataSourceName, ":memory:") {
-		for _, stmt := range schema {
-			if _, err := handle.Exec(stmt); err != nil {
-				return nil, err
-			}
-		}
-		// Always reuse connections. This is necessary to keep an in-memory
-		// database from being deleted.
-		handle.SetConnMaxLifetime(0)
-	}
-
 	return &DB{
 		handle:     handle,
 		statements: make(map[string]*sql.Stmt),
+		driverName: driverName,
 	}, nil
 }
 
@@ -126,6 +115,35 @@ func (db *DB) Load(data string) error {
 		if err := db.Insert(rec[0], rec[1]); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Migrate inspects the current active migration version and runs all necessary
+// steps to migrate all the way up.
+func (db *DB) Migrate() error {
+	var driver database.Driver
+	var err error
+	switch db.driverName {
+	case "pgx":
+		driver, err = postgres.WithInstance(db.handle, &postgres.Config{})
+		if err != nil {
+			return err
+		}
+	case "sqlite3":
+		driver, err = sqlite3.WithInstance(db.handle, &sqlite3.Config{})
+		if err != nil {
+			return err
+		}
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://./migrations", db.driverName, driver)
+	if err != nil {
+		return err
+	}
+
+	if err := m.Up(); err != nil {
+		return err
 	}
 	return nil
 }

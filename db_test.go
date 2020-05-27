@@ -23,6 +23,9 @@ func TestDBCount(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			if err := db.Migrate(); err != nil {
+				t.Fatal(err)
+			}
 			if err := db.Insert(test.input.moduleName, test.input.accountID); err != nil {
 				t.Fatal(err)
 			}

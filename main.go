@@ -84,6 +84,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := db.Migrate(); err != nil {
+		log.Fatal(err)
+	}
+
 	if len(dbdata) > 0 {
 		if err := db.Load(dbdata); err != nil {
 			log.Fatal(err)
