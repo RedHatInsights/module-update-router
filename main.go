@@ -67,8 +67,8 @@ func main() {
 	switch env {
 	case "production":
 		driver = "pgx"
-		connString = fmt.Sprintf("host=%s port=%s database=%s user=%s password=%s",
-			dbHost, dbPort, dbName, dbUser, dbPass)
+		connString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+			dbUser, dbPass, dbHost, dbPort, dbName)
 	default:
 		driver = "sqlite3"
 		connString = "file::memory:?cache=shared"
