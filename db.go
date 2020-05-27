@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -25,10 +26,13 @@ type DB struct {
 	statements map[string]*sql.Stmt
 }
 
-// Open opens a database specified by path. The only supported driver type is
-// "sqlite3". If path is ":memory:", a migration is run to create the tables.
-func Open(path string) (*DB, error) {
-	handle, err := sql.Open("sqlite3", path)
+// Open opens a database specified by dataSourceName. The only supported driver
+// types are "sqlite3" or "pgx".
+//
+// Open adheres to all database/sql driver expectations. For example, it is an
+// error to request a dataSourceName of ":memory:" with the "sqlite3" driver.
+func Open(driverName, dataSourceName string) (*DB, error) {
+	handle, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +41,7 @@ func Open(path string) (*DB, error) {
 		return nil, err
 	}
 
-	if strings.Contains(path, ":memory:") {
+	if strings.Contains(dataSourceName, ":memory:") {
 		for _, stmt := range schema {
 			if _, err := handle.Exec(stmt); err != nil {
 				return nil, err

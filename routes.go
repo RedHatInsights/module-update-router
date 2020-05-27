@@ -25,12 +25,8 @@ type Server struct {
 }
 
 // NewServer creates a new instance of the application, configured with the
-// provided addr, dbpath, and API root.
-func NewServer(addr, dbpath, apiroot string) (*Server, error) {
-	db, err := Open(dbpath)
-	if err != nil {
-		return nil, err
-	}
+// provided addr, API root and database handle.
+func NewServer(addr, apiroot string, db *DB) (*Server, error) {
 	srv := &Server{
 		mux:  &http.ServeMux{},
 		db:   db,

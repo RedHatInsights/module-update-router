@@ -65,3 +65,4 @@ objects:
       PATH_PREFIX: /api
       APP_NAME: module-update-router
       LOG_LEVEL: trace
+      ENVIRONMENT: production

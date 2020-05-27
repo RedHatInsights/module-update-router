@@ -43,12 +43,17 @@ func TestRouter(t *testing.T) {
 	}
 
 	// Bootstrap a server and seed the database
-	srv, err := NewServer(":8080", "file::memory:?cache=shared", "/api/module-update-router/v1")
+	db, err := Open("sqlite3", "file::memory:?cache=shared")
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.Load("insights-core,540155")
+
+	srv, err := NewServer(":8080", "/api/module-update-router/v1", db)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer srv.Close()
-	srv.db.Load("insights-core,540155")
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {

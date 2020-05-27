@@ -19,7 +19,7 @@ func TestDBCount(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
-			db, err := Open("file::memory:?cache=shared")
+			db, err := Open("sqlite3", "file::memory:?cache=shared")
 			if err != nil {
 				t.Fatal(err)
 			}

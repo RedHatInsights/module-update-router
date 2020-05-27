@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/google/go-cmp v0.4.0
+	github.com/jackc/pgx/v4 v4.6.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/peterbourgon/ff/v3 v3.0.0
 	github.com/prometheus/client_golang v1.5.1
