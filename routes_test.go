@@ -47,7 +47,10 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	db.Load("insights-core,540155")
+	if err := db.Migrate(); err != nil {
+		t.Fatal(err)
+	}
+	db.seedData([]byte(`INSERT INTO accounts_modules (account_id, module_name) VALUES ('540155', 'insights-core');`))
 
 	srv, err := NewServer(":8080", "/api/module-update-router/v1", db)
 	if err != nil {
