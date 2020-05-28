@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS "accounts_modules";
+DROP TABLE accounts_modules;
