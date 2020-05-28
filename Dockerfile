@@ -8,4 +8,4 @@ RUN go install -v .
 
 EXPOSE 8080 2112
 
-CMD ["module-update-router"]
+ENTRYPOINT ["module-update-router"]
