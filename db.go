@@ -2,10 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"encoding/csv"
-	"fmt"
-	"io"
-	"strings"
+	"io/ioutil"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
@@ -76,7 +73,7 @@ func (db *DB) Count(moduleName, accountID string) (int, error) {
 // module name and account ID, creating their respective table records if
 // necessary.
 func (db *DB) Insert(moduleName, accountID string) error {
-	stmt, err := db.preparedStatement(`INSERT OR IGNORE INTO accounts_modules (module_name, account_id) VALUES (?, ?);`)
+	stmt, err := db.preparedStatement(`INSERT INTO accounts_modules (module_name, account_id) VALUES (?, ?);`)
 	if err != nil {
 		return err
 	}
@@ -85,37 +82,6 @@ func (db *DB) Insert(moduleName, accountID string) error {
 		return err
 	}
 
-	return nil
-}
-
-// Load populates the database with values read from data. It is assumed that
-// data is a list of comma-separated values with module name in column 0 and
-// account ID in column 1.
-//
-// Example:
-//
-//   modfoo,123
-//   modfoo,345
-//   modboo,123
-//   modboo,678
-func (db *DB) Load(data string) error {
-	r := csv.NewReader(strings.NewReader(data))
-
-	for {
-		rec, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if len(rec) != 2 {
-			return fmt.Errorf("invalid row length: %v", rec)
-		}
-		if err := db.Insert(rec[0], rec[1]); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -143,6 +109,26 @@ func (db *DB) Migrate() error {
 	}
 
 	if err := m.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+// Seed executes the SQL contained in path in order to seed the database.
+func (db *DB) Seed(path string) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return db.seedData(data)
+}
+
+func (db *DB) seedData(data []byte) error {
+	_, err := db.handle.Exec(string(data))
+	if err != nil {
 		return err
 	}
 	return nil

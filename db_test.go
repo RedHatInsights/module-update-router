@@ -1,18 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
 func TestDBCount(t *testing.T) {
 	tests := []struct {
 		desc  string
-		input struct{ moduleName, accountID string }
+		input struct{ query, moduleName, accountID string }
 		want  int
 	}{
 		{
 			desc:  "",
-			input: struct{ moduleName, accountID string }{"modfoo", "1"},
+			input: struct{ query, moduleName, accountID string }{`INSERT INTO accounts_modules (account_id, module_name) VALUES ('%s', '%s');`, "modfoo", "1"},
 			want:  1,
 		},
 	}
@@ -26,7 +27,7 @@ func TestDBCount(t *testing.T) {
 			if err := db.Migrate(); err != nil {
 				t.Fatal(err)
 			}
-			if err := db.Insert(test.input.moduleName, test.input.accountID); err != nil {
+			if err := db.seedData([]byte(fmt.Sprintf(test.input.query, test.input.accountID, test.input.moduleName))); err != nil {
 				t.Fatal(err)
 			}
 
