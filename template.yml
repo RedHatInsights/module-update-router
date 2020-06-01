@@ -39,7 +39,7 @@ objects:
               args:
                 - "-migrate"
                 - "-seed-path=/seed/seed.sql"
-                - "-level=debug"
+                - "-log-level=debug"
               envFrom:
                 - configMapRef:
                     name: module-update-router-stage-config
