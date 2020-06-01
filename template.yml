@@ -42,7 +42,7 @@ objects:
                 - "-log-level=debug"
               envFrom:
                 - configMapRef:
-                    name: module-update-router-stage-config
+                    name: module-update-router-config
               env:
                 - name: DB_HOST
                   valueFrom:
@@ -74,7 +74,7 @@ objects:
               image: ${IMAGE}:${IMAGE_TAG}
               envFrom:
                 - configMapRef:
-                    name: module-update-router-stage-config
+                    name: module-update-router-config
               env:
                 - name: DB_HOST
                   valueFrom:
@@ -134,7 +134,7 @@ objects:
   - apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: module-update-router-stage-config
+      name: module-update-router-config
     data:
       PATH_PREFIX: /api
       APP_NAME: module-update-router
