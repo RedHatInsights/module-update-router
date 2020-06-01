@@ -103,6 +103,11 @@ objects:
               ports:
                 - containerPort: 8080
                 - containerPort: 2112
+              livenessProbe:
+                httpGet:
+                  path: /ping
+                  port: 8080
+                initialDelaySeconds: 30
           volumes:
             - name: accounts-modules
               secret:
