@@ -99,14 +99,18 @@ func main() {
 	defer db.Close()
 
 	if migrate {
+		log.Debug("running migrations")
 		if err := db.Migrate(); err != nil {
 			log.Fatal(err)
 		}
+		log.Debug("migrations complete")
 
 		if seedpath != "" {
+			log.Debug("seeding database")
 			if err := db.Seed(seedpath); err != nil {
 				log.Fatal(err)
 			}
+			log.Debug("seed complete")
 		}
 		os.Exit(0)
 	}
