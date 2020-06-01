@@ -56,7 +56,7 @@ func (db *DB) Close() error {
 // Count returns the number of records found in the accounts_modules table with
 // the given module name and account ID.
 func (db *DB) Count(moduleName, accountID string) (int, error) {
-	stmt, err := db.preparedStatement(`SELECT COUNT(*) FROM accounts_modules WHERE module_name = ? AND account_id = ?;`)
+	stmt, err := db.preparedStatement(`SELECT COUNT(*) FROM accounts_modules WHERE module_name = $1 AND account_id = $2;`)
 	if err != nil {
 		return -1, err
 	}
@@ -73,7 +73,7 @@ func (db *DB) Count(moduleName, accountID string) (int, error) {
 // module name and account ID, creating their respective table records if
 // necessary.
 func (db *DB) Insert(moduleName, accountID string) error {
-	stmt, err := db.preparedStatement(`INSERT INTO accounts_modules (module_name, account_id) VALUES (?, ?);`)
+	stmt, err := db.preparedStatement(`INSERT INTO accounts_modules (module_name, account_id) VALUES ($1, $2);`)
 	if err != nil {
 		return err
 	}
