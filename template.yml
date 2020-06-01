@@ -27,6 +27,11 @@ objects:
           labels:
             app: module-update-router
         spec:
+          metadata:
+            annotations:
+              prometheus.io/path: /
+              prometheus.io/port: "2112"
+              prometheus.io/scrape: "true"
           imagePullSecrets:
             - name: quay-cloudservices-pull
             - name: rh-registry-pull
