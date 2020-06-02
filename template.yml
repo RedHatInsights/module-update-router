@@ -122,12 +122,18 @@ objects:
     kind: Service
     metadata:
       name: module-update-router
+      annotations:
+        prometheus.io/path: /
+        prometheus.io/port: "2112"
+        prometheus.io/scrape: "true"
     spec:
       selector:
         app: module-update-router
       ports:
         - port: 8080
           targetPort: 8080
+        - port: 2112
+          targetPort: 2112
   - apiVersion: v1
     kind: Route
     metadata:
