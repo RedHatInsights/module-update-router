@@ -132,8 +132,10 @@ objects:
       ports:
         - port: 8080
           targetPort: 8080
+          name: app
         - port: 2112
           targetPort: 2112
+          name: metrics
   - apiVersion: v1
     kind: Route
     metadata:
