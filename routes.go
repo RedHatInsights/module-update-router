@@ -9,11 +9,14 @@ import (
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
-	metrics "github.com/slok/go-http-metrics/metrics/prometheus"
+	"github.com/slok/go-http-metrics/metrics"
+	httpmetrics "github.com/slok/go-http-metrics/metrics/prometheus"
 	"github.com/slok/go-http-metrics/middleware"
 
 	request "github.com/redhatinsights/platform-go-middlewares/request_id"
 )
+
+var r metrics.Recorder = httpmetrics.NewRecorder(httpmetrics.Config{})
 
 // Server is the application's HTTP server. It is comprised of an HTTP
 // multiplexer for routing HTTP requests to appropriate handlers and a database
@@ -25,14 +28,14 @@ type Server struct {
 }
 
 // NewServer creates a new instance of the application, configured with the
-// provided addr, API root and database handle.
-func NewServer(addr, apiroot string, db *DB) (*Server, error) {
+// provided addr, API roots and database handle.
+func NewServer(addr string, apiroots []string, db *DB) (*Server, error) {
 	srv := &Server{
 		mux:  &http.ServeMux{},
 		db:   db,
 		addr: addr,
 	}
-	srv.routes(apiroot)
+	srv.routes(apiroots...)
 	return srv, nil
 }
 
@@ -51,10 +54,12 @@ func (s *Server) Close() error {
 	return s.db.Close()
 }
 
-// routes registers handlerFuncs for the server paths under the given prefix.
-func (s *Server) routes(prefix string) {
+// routes registers handlerFuncs for the server paths under the given prefixes.
+func (s *Server) routes(prefixes ...string) {
 	s.mux.HandleFunc("/ping", s.handlePing())
-	s.mux.HandleFunc(prefix+"/", s.metrics(s.requestID(s.log(s.auth(s.handleAPI(prefix))))))
+	for _, prefix := range prefixes {
+		s.mux.HandleFunc(prefix+"/", s.metrics(s.requestID(s.log(s.auth(s.handleAPI(prefix))))))
+	}
 }
 
 // handlePing creates an http.HandlerFunc that handles the health check endpoint
@@ -162,7 +167,7 @@ func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 // a metrics recorder.
 func (s *Server) metrics(next http.HandlerFunc) http.HandlerFunc {
 	m := middleware.New(middleware.Config{
-		Recorder: metrics.NewRecorder(metrics.Config{}),
+		Recorder: r,
 	})
 	return func(w http.ResponseWriter, r *http.Request) {
 		m.Handler("", http.Handler(next)).ServeHTTP(w, r)

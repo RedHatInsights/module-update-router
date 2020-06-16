@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/peterbourgon/ff/v3"
@@ -115,7 +116,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	srv, err := NewServer(addr, path.Join(pathprefix, appname, apiversion), db)
+	apiroots := strings.Split(pathprefix, ",")
+	for i, root := range apiroots {
+		apiroots[i] = path.Join(root, appname, apiversion)
+	}
+
+	srv, err := NewServer(addr, apiroots, db)
 	if err != nil {
 		log.Fatal(err)
 	}
