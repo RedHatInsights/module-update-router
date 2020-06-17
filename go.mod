@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/golang-migrate/migrate/v4 v4.11.0
 	github.com/google/go-cmp v0.4.0
+	github.com/google/uuid v1.1.1
 	github.com/jackc/pgx/v4 v4.6.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/peterbourgon/ff/v3 v3.0.0

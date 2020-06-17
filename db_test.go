@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestDBCount(t *testing.T) {
@@ -37,6 +39,73 @@ func TestDBCount(t *testing.T) {
 			}
 			if got != test.want {
 				t.Errorf("%+v != %+v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestDBInsertEvents(t *testing.T) {
+	tests := []struct {
+		desc  string
+		input struct {
+			phase     string
+			startedAt time.Time
+			exit      int
+			exception sql.NullString
+			duration  time.Duration
+			machineID string
+		}
+	}{
+		{
+			desc: "basic event",
+			input: struct {
+				phase     string
+				startedAt time.Time
+				exit      int
+				exception sql.NullString
+				duration  time.Duration
+				machineID string
+			}{
+				phase:     "pre_update",
+				startedAt: time.Now(),
+				exit:      1,
+				exception: sql.NullString{String: "OSPermissionError", Valid: true},
+				duration:  time.Duration(164),
+				machineID: "fd475f2c-544f-4dd7-b53f-209df3290504",
+			},
+		},
+		{
+			desc: "null exception",
+			input: struct {
+				phase     string
+				startedAt time.Time
+				exit      int
+				exception sql.NullString
+				duration  time.Duration
+				machineID string
+			}{
+				phase:     "pre_update",
+				startedAt: time.Now(),
+				exit:      0,
+				exception: sql.NullString{String: "", Valid: false},
+				duration:  time.Duration(164),
+				machineID: "fd475f2c-544f-4dd7-b53f-209df3290504",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.desc, func(t *testing.T) {
+			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := db.Migrate(); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.duration, test.input.machineID); err != nil {
+				t.Error(err)
 			}
 		})
 	}

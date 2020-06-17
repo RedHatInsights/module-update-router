@@ -3,12 +3,14 @@ package main
 import (
 	"database/sql"
 	"io/ioutil"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/google/uuid"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
@@ -78,6 +80,26 @@ func (db *DB) InsertAccountsModules(moduleName, accountID string) error {
 		return err
 	}
 	_, err = stmt.Exec(moduleName, accountID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// InsertEvents creates a new record in the events table.
+func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exception sql.NullString, duration time.Duration, machineID string) error {
+	eventID, err := uuid.NewUUID()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.preparedStatement(`INSERT INTO events (event_id, phase, started_at, exit, exception, duration, machine_id) VALUES ($1, $2, $3, $4, $5, $6, $7);`)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(eventID.String(), phase, startedAt, exit, exception, duration, machineID)
 	if err != nil {
 		return err
 	}
