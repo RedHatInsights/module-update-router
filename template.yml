@@ -149,6 +149,6 @@ objects:
     metadata:
       name: module-update-router-config
     data:
-      PATH_PREFIX: /api
+      PATH_PREFIX: /api,/r/insights/platform
       APP_NAME: module-update-router
       DB_DRIVER: pgx
