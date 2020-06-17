@@ -33,6 +33,31 @@ paths:
           in: query
           name: module
           required: true
+  /api/v1/event:
+    post:
+      summary: Submit a run event
+      tags: []
+      operationId: post-event
+      responses:
+        "200":
+          description: OK
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phase:
+                  type: string
+                started:
+                  type: string
+                exit:
+                  type: integer
+                exception:
+                  type: string
+                duration:
+                  type: string
 components:
   schemas: {}
   securitySchemes: {}
