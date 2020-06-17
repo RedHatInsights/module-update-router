@@ -69,10 +69,10 @@ func (db *DB) Count(moduleName, accountID string) (int, error) {
 	return count, nil
 }
 
-// Insert creates a new record in the accounts_modules table with the given
-// module name and account ID, creating their respective table records if
-// necessary.
-func (db *DB) Insert(moduleName, accountID string) error {
+// InsertAccountsModules creates a new record in the accounts_modules table with
+// the given module name and account ID, creating their respective table records
+// if necessary.
+func (db *DB) InsertAccountsModules(moduleName, accountID string) error {
 	stmt, err := db.preparedStatement(`INSERT INTO accounts_modules (module_name, account_id) VALUES ($1, $2);`)
 	if err != nil {
 		return err
