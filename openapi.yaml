@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: module-update-router
-  version: '1.0'
+  version: "1.0"
 servers:
-  - url: 'http://localhost:3000'
+  - url: "http://localhost:3000"
 paths:
   /api/v1/channel:
     get:
@@ -11,7 +11,7 @@ paths:
       tags: []
       operationId: get-channel
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
