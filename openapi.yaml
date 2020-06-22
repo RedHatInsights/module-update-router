@@ -39,24 +39,34 @@ paths:
       tags: []
       operationId: post-event
       responses:
-        "200":
-          description: OK
+        "201":
+          description: CREATED
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - phase
+                - started_at
+                - exit
+                - duration
+                - machine_id
               properties:
                 phase:
                   type: string
-                started:
+                started_at:
                   type: string
+                  format: date-time
+                  example: "2006-01-02 15:04:05-07:00"
                 exit:
                   type: integer
                 exception:
                   type: string
                 duration:
+                  type: number
+                machine_id:
                   type: string
 components:
   schemas: {}
