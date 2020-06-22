@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -35,10 +36,19 @@ func formatJSONError(w http.ResponseWriter, code int, msg string) {
 	data, err := json.Marshal(&r)
 	if err != nil {
 		log.Error(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		writeError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	log.Error(r)
-	http.Error(w, string(data), code)
+	writeError(w, string(data), code)
+}
+
+// writeError replies to the request with the specified error message and HTTP
+// code.
+func writeError(w http.ResponseWriter, error string, code int) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(code)
+	fmt.Fprint(w, error)
 }
