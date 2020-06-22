@@ -26,19 +26,44 @@ func TestRouter(t *testing.T) {
 		want  response
 	}{
 		{
-			desc:  "ping",
+			desc:  "GET /ping - want OK",
 			input: request{http.MethodGet, "/ping", "", nil},
 			want:  response{http.StatusOK, "OK"},
 		},
 		{
-			desc:  "want /testing",
+			desc:  "GET /channel - want /testing",
 			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/testing"}`},
 		},
 		{
-			desc:  "want /release",
+			desc:  "GET /channel - want /release",
 			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540156", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/release"}`},
+		},
+		{
+			desc:  "POST /event - want CREATED",
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 1, "exception": "OSPermissionError", "duration": 30, "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			want:  response{http.StatusCreated, ""},
+		},
+		{
+			desc:  "POST /event - want CREATED - exception is null",
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 0, "exception": null, "duration": 30, "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			want:  response{http.StatusCreated, ""},
+		},
+		{
+			desc:  "POST /event - want CREATED - exception is omitted",
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 0, "duration": 30, "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			want:  response{http.StatusCreated, ""},
+		},
+		{
+			desc:  "POST /event - want BAD REQUEST - exit is null",
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": null, "exception": "OSPermissionError", "duration": 30, "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			want:  response{http.StatusBadRequest, `{"errors":[{"status":"Bad Request","title":"missing required field: 'exit'"}]}`},
+		},
+		{
+			desc:  "POST /event - want BAD REQUEST - exit is omitted",
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exception": "OSPermissionError", "duration": 30, "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			want:  response{http.StatusBadRequest, `{"errors":[{"status":"Bad Request","title":"missing required field: 'exit'"}]}`},
 		},
 	}
 
@@ -70,7 +95,7 @@ func TestRouter(t *testing.T) {
 			got := response{rr.Code, rr.Body.String()}
 
 			if !cmp.Equal(got, test.want, cmp.AllowUnexported(response{})) {
-				t.Errorf("%#v != %#v", got, test.want)
+				t.Errorf("%+v != %+v", got, test.want)
 			}
 		})
 	}

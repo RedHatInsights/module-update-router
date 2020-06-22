@@ -1,9 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path"
+	"reflect"
 	"time"
 
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -76,6 +80,7 @@ func (s *Server) handleAPI(prefix string) http.HandlerFunc {
 	m := http.ServeMux{}
 
 	m.HandleFunc(path.Join(prefix, "channel"), s.handleChannel())
+	m.HandleFunc(path.Join(prefix, "event"), s.handleEvent())
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		m.ServeHTTP(w, r)
@@ -111,6 +116,70 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			return
 		}
 		w.Write(data)
+	}
+}
+
+// handleEvent creates an http.HandlerFunc for the API endpoint /event.
+func (s *Server) handleEvent() http.HandlerFunc {
+	type requestBody struct {
+		Phase     *string        `json:"phase"`
+		StartedAt *time.Time     `json:"started_at"`
+		Exit      *int           `json:"exit"`
+		Exception *string        `json:"exception"`
+		Duration  *time.Duration `json:"duration"`
+		MachineID *string        `json:"machine_id"`
+	}
+	type event struct {
+		Phase     string
+		StartedAt time.Time
+		Exit      int
+		Exception sql.NullString
+		Duration  time.Duration
+		MachineID string
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			formatJSONError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		defer r.Body.Close()
+
+		var body requestBody
+		if err := json.Unmarshal(data, &body); err != nil {
+			formatJSONError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		// Check required fields for presence of value. Each struct member is
+		// compared to the zero value of its respective type.
+		for p, v := range map[string]interface{}{
+			"phase":      body.Phase,
+			"started_at": body.StartedAt,
+			"exit":       body.Exit,
+			"duration":   body.Duration,
+			"machine_id": body.MachineID,
+		} {
+			if reflect.ValueOf(v) == reflect.Zero(reflect.TypeOf(v)) {
+				formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required field: '%v'`, p))
+				return
+			}
+		}
+
+		e := event{
+			Phase:     *body.Phase,
+			StartedAt: *body.StartedAt,
+			Exit:      *body.Exit,
+			Exception: NewNullString(body.Exception),
+			Duration:  *body.Duration,
+			MachineID: *body.MachineID,
+		}
+
+		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.Duration, e.MachineID); err != nil {
+			formatJSONError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		w.WriteHeader(http.StatusCreated)
 	}
 }
 
