@@ -48,48 +48,53 @@ func TestDBInsertEvents(t *testing.T) {
 	tests := []struct {
 		desc  string
 		input struct {
-			phase     string
-			startedAt time.Time
-			exit      int
-			exception sql.NullString
-			duration  time.Duration
-			machineID string
+			phase       string
+			startedAt   time.Time
+			exit        int
+			exception   sql.NullString
+			duration    time.Duration
+			machineID   string
+			coreVersion string
 		}
 	}{
 		{
 			desc: "basic event",
 			input: struct {
-				phase     string
-				startedAt time.Time
-				exit      int
-				exception sql.NullString
-				duration  time.Duration
-				machineID string
+				phase       string
+				startedAt   time.Time
+				exit        int
+				exception   sql.NullString
+				duration    time.Duration
+				machineID   string
+				coreVersion string
 			}{
-				phase:     "pre_update",
-				startedAt: time.Now(),
-				exit:      1,
-				exception: sql.NullString{String: "OSPermissionError", Valid: true},
-				duration:  time.Duration(164),
-				machineID: "fd475f2c-544f-4dd7-b53f-209df3290504",
+				phase:       "pre_update",
+				startedAt:   time.Now(),
+				exit:        1,
+				exception:   sql.NullString{String: "OSPermissionError", Valid: true},
+				duration:    time.Duration(164),
+				machineID:   "fd475f2c-544f-4dd7-b53f-209df3290504",
+				coreVersion: "3.0.156",
 			},
 		},
 		{
 			desc: "null exception",
 			input: struct {
-				phase     string
-				startedAt time.Time
-				exit      int
-				exception sql.NullString
-				duration  time.Duration
-				machineID string
+				phase       string
+				startedAt   time.Time
+				exit        int
+				exception   sql.NullString
+				duration    time.Duration
+				machineID   string
+				coreVersion string
 			}{
-				phase:     "pre_update",
-				startedAt: time.Now(),
-				exit:      0,
-				exception: sql.NullString{String: "", Valid: false},
-				duration:  time.Duration(164),
-				machineID: "fd475f2c-544f-4dd7-b53f-209df3290504",
+				phase:       "pre_update",
+				startedAt:   time.Now(),
+				exit:        0,
+				exception:   sql.NullString{String: "", Valid: false},
+				duration:    time.Duration(164),
+				machineID:   "fd475f2c-544f-4dd7-b53f-209df3290504",
+				coreVersion: "3.0.156",
 			},
 		},
 	}
@@ -104,7 +109,7 @@ func TestDBInsertEvents(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.duration, test.input.machineID); err != nil {
+			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.duration, test.input.machineID, test.input.coreVersion); err != nil {
 				t.Error(err)
 			}
 		})

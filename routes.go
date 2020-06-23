@@ -122,20 +122,22 @@ func (s *Server) handleChannel() http.HandlerFunc {
 // handleEvent creates an http.HandlerFunc for the API endpoint /event.
 func (s *Server) handleEvent() http.HandlerFunc {
 	type requestBody struct {
-		Phase     *string        `json:"phase"`
-		StartedAt *time.Time     `json:"started_at"`
-		Exit      *int           `json:"exit"`
-		Exception *string        `json:"exception"`
-		Duration  *time.Duration `json:"duration"`
-		MachineID *string        `json:"machine_id"`
+		Phase       *string        `json:"phase"`
+		StartedAt   *time.Time     `json:"started_at"`
+		Exit        *int           `json:"exit"`
+		Exception   *string        `json:"exception"`
+		Duration    *time.Duration `json:"duration"`
+		MachineID   *string        `json:"machine_id"`
+		CoreVersion *string        `json:"core_version"`
 	}
 	type event struct {
-		Phase     string
-		StartedAt time.Time
-		Exit      int
-		Exception sql.NullString
-		Duration  time.Duration
-		MachineID string
+		Phase       string
+		StartedAt   time.Time
+		Exit        int
+		Exception   sql.NullString
+		Duration    time.Duration
+		MachineID   string
+		CoreVersion string
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -154,11 +156,12 @@ func (s *Server) handleEvent() http.HandlerFunc {
 		// Check required fields for presence of value. Each struct member is
 		// compared to the zero value of its respective type.
 		for p, v := range map[string]interface{}{
-			"phase":      body.Phase,
-			"started_at": body.StartedAt,
-			"exit":       body.Exit,
-			"duration":   body.Duration,
-			"machine_id": body.MachineID,
+			"phase":        body.Phase,
+			"started_at":   body.StartedAt,
+			"exit":         body.Exit,
+			"duration":     body.Duration,
+			"machine_id":   body.MachineID,
+			"core_version": body.CoreVersion,
 		} {
 			if reflect.ValueOf(v) == reflect.Zero(reflect.TypeOf(v)) {
 				formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required field: '%v'`, p))
@@ -167,15 +170,16 @@ func (s *Server) handleEvent() http.HandlerFunc {
 		}
 
 		e := event{
-			Phase:     *body.Phase,
-			StartedAt: *body.StartedAt,
-			Exit:      *body.Exit,
-			Exception: NewNullString(body.Exception),
-			Duration:  *body.Duration,
-			MachineID: *body.MachineID,
+			Phase:       *body.Phase,
+			StartedAt:   *body.StartedAt,
+			Exit:        *body.Exit,
+			Exception:   NewNullString(body.Exception),
+			Duration:    *body.Duration,
+			MachineID:   *body.MachineID,
+			CoreVersion: *body.CoreVersion,
 		}
 
-		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.Duration, e.MachineID); err != nil {
+		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.Duration, e.MachineID, e.CoreVersion); err != nil {
 			formatJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}

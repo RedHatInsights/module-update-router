@@ -53,6 +53,7 @@ paths:
                 - exit
                 - duration
                 - machine_id
+                - core_version
               properties:
                 phase:
                   type: string
@@ -67,6 +68,8 @@ paths:
                 duration:
                   type: number
                 machine_id:
+                  type: string
+                core_version:
                   type: string
 components:
   schemas: {}

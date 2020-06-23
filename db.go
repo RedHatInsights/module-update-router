@@ -88,18 +88,18 @@ func (db *DB) InsertAccountsModules(moduleName, accountID string) error {
 }
 
 // InsertEvents creates a new record in the events table.
-func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exception sql.NullString, duration time.Duration, machineID string) error {
+func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exception sql.NullString, duration time.Duration, machineID string, coreVersion string) error {
 	eventID, err := uuid.NewUUID()
 	if err != nil {
 		return err
 	}
 
-	stmt, err := db.preparedStatement(`INSERT INTO events (event_id, phase, started_at, exit, exception, duration, machine_id) VALUES ($1, $2, $3, $4, $5, $6, $7);`)
+	stmt, err := db.preparedStatement(`INSERT INTO events (event_id, phase, started_at, exit, exception, duration, machine_id, core_version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`)
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(eventID.String(), phase, startedAt, exit, exception, duration, machineID)
+	_, err = stmt.Exec(eventID.String(), phase, startedAt, exit, exception, duration, machineID, coreVersion)
 	if err != nil {
 		return err
 	}
