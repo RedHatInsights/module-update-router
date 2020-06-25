@@ -52,7 +52,7 @@ func TestDBInsertEvents(t *testing.T) {
 			startedAt   time.Time
 			exit        int
 			exception   sql.NullString
-			duration    time.Duration
+			endedAt     time.Time
 			machineID   string
 			coreVersion string
 		}
@@ -64,7 +64,7 @@ func TestDBInsertEvents(t *testing.T) {
 				startedAt   time.Time
 				exit        int
 				exception   sql.NullString
-				duration    time.Duration
+				endedAt     time.Time
 				machineID   string
 				coreVersion string
 			}{
@@ -72,7 +72,7 @@ func TestDBInsertEvents(t *testing.T) {
 				startedAt:   time.Now(),
 				exit:        1,
 				exception:   sql.NullString{String: "OSPermissionError", Valid: true},
-				duration:    time.Duration(164),
+				endedAt:     time.Now().Add(164),
 				machineID:   "fd475f2c-544f-4dd7-b53f-209df3290504",
 				coreVersion: "3.0.156",
 			},
@@ -84,7 +84,7 @@ func TestDBInsertEvents(t *testing.T) {
 				startedAt   time.Time
 				exit        int
 				exception   sql.NullString
-				duration    time.Duration
+				endedAt     time.Time
 				machineID   string
 				coreVersion string
 			}{
@@ -92,7 +92,7 @@ func TestDBInsertEvents(t *testing.T) {
 				startedAt:   time.Now(),
 				exit:        0,
 				exception:   sql.NullString{String: "", Valid: false},
-				duration:    time.Duration(164),
+				endedAt:     time.Now().Add(164),
 				machineID:   "fd475f2c-544f-4dd7-b53f-209df3290504",
 				coreVersion: "3.0.156",
 			},
@@ -109,7 +109,7 @@ func TestDBInsertEvents(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.duration, test.input.machineID, test.input.coreVersion); err != nil {
+			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.endedAt, test.input.machineID, test.input.coreVersion); err != nil {
 				t.Error(err)
 			}
 		})

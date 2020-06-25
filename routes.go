@@ -122,20 +122,20 @@ func (s *Server) handleChannel() http.HandlerFunc {
 // handleEvent creates an http.HandlerFunc for the API endpoint /event.
 func (s *Server) handleEvent() http.HandlerFunc {
 	type requestBody struct {
-		Phase       *string        `json:"phase"`
-		StartedAt   *time.Time     `json:"started_at"`
-		Exit        *int           `json:"exit"`
-		Exception   *string        `json:"exception"`
-		Duration    *time.Duration `json:"duration"`
-		MachineID   *string        `json:"machine_id"`
-		CoreVersion *string        `json:"core_version"`
+		Phase       *string    `json:"phase"`
+		StartedAt   *time.Time `json:"started_at"`
+		Exit        *int       `json:"exit"`
+		Exception   *string    `json:"exception"`
+		EndedAt     *time.Time `json:"ended_at"`
+		MachineID   *string    `json:"machine_id"`
+		CoreVersion *string    `json:"core_version"`
 	}
 	type event struct {
 		Phase       string
 		StartedAt   time.Time
 		Exit        int
 		Exception   sql.NullString
-		Duration    time.Duration
+		EndedAt     time.Time
 		MachineID   string
 		CoreVersion string
 	}
@@ -159,7 +159,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			"phase":        body.Phase,
 			"started_at":   body.StartedAt,
 			"exit":         body.Exit,
-			"duration":     body.Duration,
+			"ended_at":     body.EndedAt,
 			"machine_id":   body.MachineID,
 			"core_version": body.CoreVersion,
 		} {
@@ -174,12 +174,12 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			StartedAt:   *body.StartedAt,
 			Exit:        *body.Exit,
 			Exception:   NewNullString(body.Exception),
-			Duration:    *body.Duration,
+			EndedAt:     *body.EndedAt,
 			MachineID:   *body.MachineID,
 			CoreVersion: *body.CoreVersion,
 		}
 
-		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.Duration, e.MachineID, e.CoreVersion); err != nil {
+		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.EndedAt, e.MachineID, e.CoreVersion); err != nil {
 			formatJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}

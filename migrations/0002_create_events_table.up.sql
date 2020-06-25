@@ -4,7 +4,7 @@ CREATE TABLE events (
     started_at TIMESTAMP NOT NULL,
     exit INTEGER NOT NULL,
     exception VARCHAR(1024),
-    duration INTEGER NOT NULL,
+    ended_at TIMESTAMP NOT NULL,
     machine_id VARCHAR(36) NOT NULL,
     core_version VARCHAR(256) NOT NULL
 );

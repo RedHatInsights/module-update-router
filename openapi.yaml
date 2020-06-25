@@ -51,7 +51,7 @@ paths:
                 - phase
                 - started_at
                 - exit
-                - duration
+                - ended_at
                 - machine_id
                 - core_version
               properties:
@@ -65,8 +65,10 @@ paths:
                   type: integer
                 exception:
                   type: string
-                duration:
-                  type: number
+                ended_at:
+                  type: string
+                  format: date-time
+                  example: "2006-01-02 15:04:05-07:00"
                 machine_id:
                   type: string
                 core_version:
