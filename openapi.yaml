@@ -60,7 +60,7 @@ paths:
                 started_at:
                   type: string
                   format: date-time
-                  example: "2006-01-02 15:04:05-07:00"
+                  example: "2006-01-02T15:04:05+00:00"
                 exit:
                   type: integer
                 exception:
@@ -68,7 +68,7 @@ paths:
                 ended_at:
                   type: string
                   format: date-time
-                  example: "2006-01-02 15:04:05-07:00"
+                  example: "2006-01-02T15:04:05+00:00"
                 machine_id:
                   type: string
                 core_version:
