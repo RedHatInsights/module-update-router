@@ -45,7 +45,6 @@ objects:
                 - "-migrate"
                 - "-seed-path=/seed/seed.sql"
                 - "-log-level=debug"
-                - "-reset"
               envFrom:
                 - configMapRef:
                     name: module-update-router-config
