@@ -72,7 +72,7 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := db.Migrate(); err != nil {
+	if err := db.Migrate(false); err != nil {
 		t.Fatal(err)
 	}
 	db.seedData([]byte(`INSERT INTO accounts_modules (account_id, module_name) VALUES ('540155', 'insights-core');`))

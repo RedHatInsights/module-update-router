@@ -108,8 +108,9 @@ func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exceptio
 }
 
 // Migrate inspects the current active migration version and runs all necessary
-// steps to migrate all the way up.
-func (db *DB) Migrate() error {
+// steps to migrate all the way up. If reset is true, everything is deleted in
+// the database before applying migrations.
+func (db *DB) Migrate(reset bool) error {
 	var driver database.Driver
 	var err error
 	switch db.driverName {
@@ -128,6 +129,12 @@ func (db *DB) Migrate() error {
 	m, err := migrate.NewWithDatabaseInstance("file://./migrations", db.driverName, driver)
 	if err != nil {
 		return err
+	}
+
+	if reset {
+		if err := m.Drop(); err != nil {
+			return err
+		}
 	}
 
 	if err := m.Up(); err != nil {

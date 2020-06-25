@@ -26,7 +26,7 @@ func TestDBCount(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := db.Migrate(); err != nil {
+			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
 			if err := db.seedData([]byte(fmt.Sprintf(test.input.query, test.input.accountID, test.input.moduleName))); err != nil {
@@ -105,7 +105,7 @@ func TestDBInsertEvents(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := db.Migrate(); err != nil {
+			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
 

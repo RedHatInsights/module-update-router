@@ -32,6 +32,7 @@ func main() {
 		dbURL      string
 		migrate    bool
 		seedpath   string
+		reset      bool
 	)
 
 	const (
@@ -54,6 +55,7 @@ func main() {
 	fs.StringVar(&dbURL, "database-url", "", "database connection URL")
 	fs.BoolVar(&migrate, "migrate", false, "run migrations")
 	fs.StringVar(&seedpath, "seed-path", "", "path to the SQL seed file")
+	fs.BoolVar(&reset, "drop", false, "drop all tables before running migrations")
 
 	ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix())
 
@@ -101,7 +103,7 @@ func main() {
 
 	if migrate {
 		log.Debug("running migrations")
-		if err := db.Migrate(); err != nil {
+		if err := db.Migrate(reset); err != nil {
 			log.Fatal(err)
 		}
 		log.Debug("migrations complete")
