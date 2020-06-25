@@ -55,7 +55,7 @@ func main() {
 	fs.StringVar(&dbURL, "database-url", "", "database connection URL")
 	fs.BoolVar(&migrate, "migrate", false, "run migrations")
 	fs.StringVar(&seedpath, "seed-path", "", "path to the SQL seed file")
-	fs.BoolVar(&reset, "drop", false, "drop all tables before running migrations")
+	fs.BoolVar(&reset, "reset", false, "drop all tables before running migrations")
 
 	ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix())
 
