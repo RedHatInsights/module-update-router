@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
-	"reflect"
 	"time"
 
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -155,8 +154,9 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			return
 		}
 
-		// Check required fields for presence of value. Each struct member is
-		// compared to the zero value of its respective type.
+		// Check required fields for presence of a value. Each struct member of
+		// body is compared to the nil value, and an error is returned if a value
+		// is found to be nil.
 		for p, v := range map[string]interface{}{
 			"phase":        body.Phase,
 			"started_at":   body.StartedAt,
@@ -166,8 +166,24 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			"core_version": body.CoreVersion,
 			"core_path":    body.CorePath,
 		} {
-			if reflect.ValueOf(v) == reflect.Zero(reflect.TypeOf(v)) {
-				formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required field: '%v'`, p))
+			switch t := v.(type) {
+			case *string:
+				if v.(*string) == nil {
+					formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required %T field: '%v'`, t, p))
+					return
+				}
+			case *int:
+				if v.(*int) == nil {
+					formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required %T field: '%v'`, t, p))
+					return
+				}
+			case *time.Time:
+				if v.(*time.Time) == nil {
+					formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required %T field: '%v'`, t, p))
+					return
+				}
+			default:
+				formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`unsupported type: '%T'`, t))
 				return
 			}
 		}
