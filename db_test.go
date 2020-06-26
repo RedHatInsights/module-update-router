@@ -45,29 +45,23 @@ func TestDBCount(t *testing.T) {
 }
 
 func TestDBInsertEvents(t *testing.T) {
+	type record struct {
+		phase       string
+		startedAt   time.Time
+		exit        int
+		exception   sql.NullString
+		endedAt     time.Time
+		machineID   string
+		coreVersion string
+	}
+
 	tests := []struct {
 		desc  string
-		input struct {
-			phase       string
-			startedAt   time.Time
-			exit        int
-			exception   sql.NullString
-			endedAt     time.Time
-			machineID   string
-			coreVersion string
-		}
+		input record
 	}{
 		{
 			desc: "basic event",
-			input: struct {
-				phase       string
-				startedAt   time.Time
-				exit        int
-				exception   sql.NullString
-				endedAt     time.Time
-				machineID   string
-				coreVersion string
-			}{
+			input: record{
 				phase:       "pre_update",
 				startedAt:   time.Now(),
 				exit:        1,
@@ -79,15 +73,7 @@ func TestDBInsertEvents(t *testing.T) {
 		},
 		{
 			desc: "null exception",
-			input: struct {
-				phase       string
-				startedAt   time.Time
-				exit        int
-				exception   sql.NullString
-				endedAt     time.Time
-				machineID   string
-				coreVersion string
-			}{
+			input: record{
 				phase:       "pre_update",
 				startedAt:   time.Now(),
 				exit:        0,
