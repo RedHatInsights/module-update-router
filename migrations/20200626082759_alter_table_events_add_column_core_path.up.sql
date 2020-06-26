@@ -1,0 +1,2 @@
+ALTER TABLE events
+ADD COLUMN core_path VARCHAR(256);

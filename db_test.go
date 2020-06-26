@@ -53,6 +53,7 @@ func TestDBInsertEvents(t *testing.T) {
 		endedAt     time.Time
 		machineID   string
 		coreVersion string
+		corePath    string
 	}
 
 	tests := []struct {
@@ -69,6 +70,7 @@ func TestDBInsertEvents(t *testing.T) {
 				endedAt:     time.Now().Add(164),
 				machineID:   "fd475f2c-544f-4dd7-b53f-209df3290504",
 				coreVersion: "3.0.156",
+				corePath:    "/etc/rpm/insights.egg",
 			},
 		},
 		{
@@ -81,6 +83,7 @@ func TestDBInsertEvents(t *testing.T) {
 				endedAt:     time.Now().Add(164),
 				machineID:   "fd475f2c-544f-4dd7-b53f-209df3290504",
 				coreVersion: "3.0.156",
+				corePath:    "/etc/rpm/insights.egg",
 			},
 		},
 	}
@@ -95,7 +98,7 @@ func TestDBInsertEvents(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.endedAt, test.input.machineID, test.input.coreVersion); err != nil {
+			if err := db.InsertEvents(test.input.phase, test.input.startedAt, test.input.exit, test.input.exception, test.input.endedAt, test.input.machineID, test.input.coreVersion, test.input.corePath); err != nil {
 				t.Error(err)
 			}
 		})

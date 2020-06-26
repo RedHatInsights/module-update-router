@@ -129,6 +129,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 		EndedAt     *time.Time `json:"ended_at"`
 		MachineID   *string    `json:"machine_id"`
 		CoreVersion *string    `json:"core_version"`
+		CorePath    *string    `json:"core_path"`
 	}
 	type event struct {
 		Phase       string
@@ -138,6 +139,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 		EndedAt     time.Time
 		MachineID   string
 		CoreVersion string
+		CorePath    string
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -162,6 +164,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			"ended_at":     body.EndedAt,
 			"machine_id":   body.MachineID,
 			"core_version": body.CoreVersion,
+			"core_path":    body.CorePath,
 		} {
 			if reflect.ValueOf(v) == reflect.Zero(reflect.TypeOf(v)) {
 				formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required field: '%v'`, p))
@@ -177,9 +180,10 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			EndedAt:     *body.EndedAt,
 			MachineID:   *body.MachineID,
 			CoreVersion: *body.CoreVersion,
+			CorePath:    *body.CorePath,
 		}
 
-		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.EndedAt, e.MachineID, e.CoreVersion); err != nil {
+		if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.EndedAt, e.MachineID, e.CoreVersion, e.CorePath); err != nil {
 			formatJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
