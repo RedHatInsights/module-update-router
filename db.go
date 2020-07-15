@@ -107,6 +107,22 @@ func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exceptio
 	return nil
 }
 
+// CountAccountsEvents returns the number of records found in the accounts_events
+// table with the given account ID.
+func (db *DB) CountAccountsEvents(accountID string) (int, error) {
+	stmt, err := db.preparedStatement(`SELECT COUNT(*) FROM accounts_events WHERE account_id = $1;`)
+	if err != nil {
+		return -1, err
+	}
+
+	var count int
+	err = stmt.QueryRow(accountID).Scan(&count)
+	if err != nil {
+		return -1, err
+	}
+	return count, nil
+}
+
 // Migrate inspects the current active migration version and runs all necessary
 // steps to migrate all the way up. If reset is true, everything is deleted in
 // the database before applying migrations.
