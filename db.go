@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"io/ioutil"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,8 +21,8 @@ import (
 // DB wraps a sql.DB handle, providing an application-specific, higher-level API
 // around the standard sql.DB interface.
 type DB struct {
-	handle     *sql.DB
-	statements map[string]*sql.Stmt
+	handle     *sqlx.DB
+	statements map[string]*sqlx.Stmt
 	driverName string
 }
 
@@ -30,7 +32,7 @@ type DB struct {
 // Open adheres to all database/sql driver expectations. For example, it is an
 // error to request a dataSourceName of ":memory:" with the "sqlite3" driver.
 func Open(driverName, dataSourceName string) (*DB, error) {
-	handle, err := sql.Open(driverName, dataSourceName)
+	handle, err := sqlx.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +43,7 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 
 	return &DB{
 		handle:     handle,
-		statements: make(map[string]*sql.Stmt),
+		statements: make(map[string]*sqlx.Stmt),
 		driverName: driverName,
 	}, nil
 }
@@ -107,6 +109,64 @@ func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exceptio
 	return nil
 }
 
+// GetEvents returns a slice of maps loaded with records from the events table.
+func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error) {
+	type event struct {
+		EventID     string         `db:"event_id"`
+		Phase       string         `db:"phase"`
+		StartedAt   time.Time      `db:"started_at"`
+		Exit        int            `db:"exit"`
+		Exception   sql.NullString `db:"exception"`
+		EndedAt     time.Time      `db:"ended_at"`
+		MachineID   string         `db:"machine_id"`
+		CoreVersion string         `db:"core_version"`
+		CorePath    string         `db:"core_path"`
+	}
+	var stmt *sqlx.Stmt
+	if limit < 0 {
+		var err error
+		stmt, err = db.preparedStatement(`SELECT * FROM events ORDER BY started_at;`)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		var err error
+		stmt, err = db.preparedStatement(fmt.Sprintf(`SELECT * FROM events ORDER BY started_at LIMIT %v OFFSET %v;`, limit, offset))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	rows, err := stmt.Queryx()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	events := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var e event
+		if err := rows.StructScan(&e); err != nil {
+			return nil, err
+		}
+		event := make(map[string]interface{})
+		event["event_id"] = e.EventID
+		event["phase"] = e.Phase
+		event["started_at"] = e.StartedAt
+		event["exit"] = e.Exit
+		event["exception"] = e.Exception
+		event["ended_at"] = e.EndedAt
+		event["machine_id"] = e.MachineID
+		event["core_version"] = e.CoreVersion
+		event["core_path"] = e.CorePath
+		events = append(events, event)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return events, nil
+}
+
 // CountAccountsEvents returns the number of records found in the accounts_events
 // table with the given account ID.
 func (db *DB) CountAccountsEvents(accountID string) (int, error) {
@@ -131,12 +191,12 @@ func (db *DB) Migrate(reset bool) error {
 	var err error
 	switch db.driverName {
 	case "pgx":
-		driver, err = postgres.WithInstance(db.handle, &postgres.Config{})
+		driver, err = postgres.WithInstance(db.handle.DB, &postgres.Config{})
 		if err != nil {
 			return err
 		}
 	case "sqlite3":
-		driver, err = sqlite3.WithInstance(db.handle, &sqlite3.Config{})
+		driver, err = sqlite3.WithInstance(db.handle.DB, &sqlite3.Config{})
 		if err != nil {
 			return err
 		}
@@ -182,12 +242,12 @@ func (db *DB) seedData(data []byte) error {
 // preparedStatement creates a prepared statement for the given query, caches
 // it in a map and returns the prepared statement. If a statement already exists
 // for query, the cached statement is returned.
-func (db *DB) preparedStatement(query string) (*sql.Stmt, error) {
+func (db *DB) preparedStatement(query string) (*sqlx.Stmt, error) {
 	stmt := db.statements[query]
 	if stmt != nil {
 		return stmt, nil
 	}
-	stmt, err := db.handle.Prepare(query)
+	stmt, err := db.handle.Preparex(query)
 	if err != nil {
 		return nil, err
 	}
