@@ -209,7 +209,7 @@ func TestDBGetEvents(t *testing.T) {
 			want: []map[string]interface{}{},
 		},
 		{
-			desc: "limit -11",
+			desc: "limit -1",
 			input: struct {
 				query  string
 				limit  int
