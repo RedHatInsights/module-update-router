@@ -17,22 +17,24 @@ import (
 
 func main() {
 	var (
-		addr       string
-		maddr      string
-		logLevel   string
-		logFormat  string
-		pathprefix string
-		appname    string
-		dbDriver   string
-		dbHost     string
-		dbPort     string
-		dbName     string
-		dbUser     string
-		dbPass     string
-		dbURL      string
-		migrate    bool
-		seedpath   string
-		reset      bool
+		addr           string
+		maddr          string
+		logLevel       string
+		logFormat      string
+		pathprefix     string
+		appname        string
+		dbDriver       string
+		dbHost         string
+		dbPort         string
+		dbName         string
+		dbUser         string
+		dbPass         string
+		dbURL          string
+		metricsTopic   string
+		kafkaBootstrap string
+		migrate        bool
+		seedpath       string
+		reset          bool
 	)
 
 	const (
@@ -53,6 +55,8 @@ func main() {
 	fs.StringVar(&dbUser, "db-user", "postgres", "database username")
 	fs.StringVar(&dbPass, "db-pass", "", "database user password")
 	fs.StringVar(&dbURL, "database-url", "", "database connection URL")
+	fs.StringVar(&metricsTopic, "metrics-topic", "platform.upload.client-metrics", "topic on which to place metrics data")
+	fs.StringVar(&kafkaBootstrap, "kafka-bootstrap", "localhost:29092", "url of the kafka broker for the cluster")
 	fs.BoolVar(&migrate, "migrate", false, "run migrations")
 	fs.StringVar(&seedpath, "seed-path", "", "path to the SQL seed file")
 	fs.BoolVar(&reset, "reset", false, "drop all tables before running migrations")
@@ -123,7 +127,15 @@ func main() {
 		apiroots[i] = path.Join(root, appname, apiversion)
 	}
 
-	srv, err := NewServer(addr, apiroots, db)
+	msgChannel := make(chan []byte, 100)
+	producer := &ProducerConfig{
+		Brokers: []string{kafkaBootstrap},
+		Topic:   metricsTopic,
+		Async:   true,
+	}
+	go Producer(producer, msgChannel)
+
+	srv, err := NewServer(addr, apiroots, db, msgChannel)
 	if err != nil {
 		log.Fatal(err)
 	}

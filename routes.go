@@ -30,15 +30,17 @@ type Server struct {
 	mux  *http.ServeMux
 	db   *DB
 	addr string
+	in   chan []byte
 }
 
 // NewServer creates a new instance of the application, configured with the
 // provided addr, API roots and database handle.
-func NewServer(addr string, apiroots []string, db *DB) (*Server, error) {
+func NewServer(addr string, apiroots []string, db *DB, msgChannel chan []byte) (*Server, error) {
 	srv := &Server{
 		mux:  &http.ServeMux{},
 		db:   db,
 		addr: addr,
+		in:   msgChannel,
 	}
 	srv.routes(apiroots...)
 	return srv, nil
@@ -207,6 +209,12 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
+			// Marshal event for production to kafka topic
+			message, err := json.Marshal(&e)
+			if err != nil {
+				log.Error("Failed to unmarshal event JSON for message queue")
+			}
+			s.in <- message
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id := identity.Get(r.Context())
