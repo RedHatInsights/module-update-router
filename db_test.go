@@ -28,6 +28,7 @@ func TestDBCount(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer db.Close()
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
@@ -147,6 +148,7 @@ func TestDBInsertEvents(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer db.Close()
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
