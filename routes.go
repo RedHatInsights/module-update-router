@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -206,6 +208,60 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				return
 			}
 			w.WriteHeader(http.StatusCreated)
+		case http.MethodGet:
+			id := identity.Get(r.Context())
+			count, err := s.db.CountAccountsEvents(id.Identity.AccountNumber)
+			if err != nil {
+				formatJSONError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			if count < 1 {
+				formatJSONError(w, http.StatusUnauthorized, "")
+				return
+			}
+
+			params, err := url.ParseQuery(r.URL.RawQuery)
+			if err != nil {
+				formatJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			var limit, offset int64
+			{
+				var err error
+				p := params.Get("limit")
+				if p == "" {
+					p = "-1"
+				}
+				limit, err = strconv.ParseInt(p, 10, 64)
+				if err != nil {
+					formatJSONError(w, http.StatusBadRequest, err.Error())
+					return
+				}
+			}
+			{
+				var err error
+				p := params.Get("offset")
+				if p == "" {
+					p = "0"
+				}
+				offset, err = strconv.ParseInt(p, 10, 64)
+				if err != nil {
+					formatJSONError(w, http.StatusBadRequest, err.Error())
+					return
+				}
+			}
+
+			events, err := s.db.GetEvents(int(limit), int(offset))
+			if err != nil {
+				formatJSONError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			data, err := json.Marshal(&events)
+			if err != nil {
+				formatJSONError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			w.Write(data)
 		default:
 			formatJSONError(w, http.StatusMethodNotAllowed, fmt.Sprintf("error: '%s' not allowed", r.Method))
 			return
