@@ -27,20 +27,20 @@ var r metrics.Recorder = httpmetrics.NewRecorder(httpmetrics.Config{})
 // multiplexer for routing HTTP requests to appropriate handlers and a database
 // handle for looking up application data.
 type Server struct {
-	mux  *http.ServeMux
-	db   *DB
-	addr string
-	in   chan []byte
+	mux    *http.ServeMux
+	db     *DB
+	addr   string
+	events chan []byte
 }
 
 // NewServer creates a new instance of the application, configured with the
 // provided addr, API roots and database handle.
-func NewServer(addr string, apiroots []string, db *DB, msgChannel chan []byte) (*Server, error) {
+func NewServer(addr string, apiroots []string, db *DB, events chan []byte) (*Server, error) {
 	srv := &Server{
-		mux:  &http.ServeMux{},
-		db:   db,
-		addr: addr,
-		in:   msgChannel,
+		mux:    &http.ServeMux{},
+		db:     db,
+		addr:   addr,
+		events: events,
 	}
 	srv.routes(apiroots...)
 	return srv, nil
@@ -209,12 +209,13 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
-			// Marshal event for production to kafka topic
-			message, err := json.Marshal(&e)
-			if err != nil {
-				log.Error("Failed to unmarshal event JSON for message queue")
+			{
+				data, err := json.Marshal(&e)
+				if err != nil {
+					log.Errorf("error: failed to Marshal event into JSON: %v", err)
+				}
+				s.events <- data
 			}
-			s.in <- message
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id := identity.Get(r.Context())
