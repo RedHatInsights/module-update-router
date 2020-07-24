@@ -187,28 +187,21 @@ func (db *DB) CountAccountsEvents(accountID string) (int, error) {
 // steps to migrate all the way up. If reset is true, everything is deleted in
 // the database before applying migrations.
 func (db *DB) Migrate(reset bool) error {
-	var driver database.Driver
-	var err error
-	switch db.driverName {
-	case "pgx":
-		driver, err = postgres.WithInstance(db.handle.DB, &postgres.Config{})
-		if err != nil {
-			return err
-		}
-	case "sqlite3":
-		driver, err = sqlite3.WithInstance(db.handle.DB, &sqlite3.Config{})
-		if err != nil {
-			return err
-		}
-	}
-
-	m, err := migrate.NewWithDatabaseInstance("file://./migrations", db.driverName, driver)
+	m, err := newMigrate(db.handle.DB, db.driverName)
 	if err != nil {
 		return err
 	}
 
 	if reset {
 		if err := m.Drop(); err != nil {
+			return err
+		}
+		// After calling Drop, we need to ensure the schema_migrations table
+		// exists. In the postgres driver, an unexported function, ensureVersionTable,
+		// is called inside WithInstance. So we just reinitialize m to a new
+		// Migrate instance.
+		m, err = newMigrate(db.handle.DB, db.driverName)
+		if err != nil {
 			return err
 		}
 	}
@@ -253,4 +246,28 @@ func (db *DB) preparedStatement(query string) (*sqlx.Stmt, error) {
 	}
 	db.statements[query] = stmt
 	return stmt, nil
+}
+
+func newMigrate(db *sql.DB, driverName string) (*migrate.Migrate, error) {
+	var driver database.Driver
+	var err error
+	switch driverName {
+	case "pgx":
+		driver, err = postgres.WithInstance(db, &postgres.Config{})
+		if err != nil {
+			return nil, err
+		}
+	case "sqlite3":
+		driver, err = sqlite3.WithInstance(db, &sqlite3.Config{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://./migrations", driverName, driver)
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
 }
