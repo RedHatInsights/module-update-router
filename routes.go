@@ -216,7 +216,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				return
 			}
 			if count < 1 {
-				formatJSONError(w, http.StatusUnauthorized, "")
+				formatJSONError(w, http.StatusUnauthorized, fmt.Sprintf("unauthorized access by account %v", id.Identity.AccountNumber))
 				return
 			}
 
