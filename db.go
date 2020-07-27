@@ -120,7 +120,7 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 		EndedAt     time.Time      `db:"ended_at"`
 		MachineID   string         `db:"machine_id"`
 		CoreVersion string         `db:"core_version"`
-		CorePath    string         `db:"core_path"`
+		CorePath    sql.NullString `db:"core_path"`
 	}
 	var stmt *sqlx.Stmt
 	if limit < 0 {
