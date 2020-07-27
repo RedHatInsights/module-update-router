@@ -225,7 +225,6 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
-
 			var limit, offset int64
 			{
 				var err error
@@ -252,27 +251,17 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				}
 			}
 
-			switch params.Get("format") {
-			case "sql":
-				data, err := s.db.DumpEvents()
-				if err != nil {
-					formatJSONError(w, http.StatusInternalServerError, err.Error())
-					return
-				}
-				w.Write(data)
-			default:
-				events, err := s.db.GetEvents(int(limit), int(offset))
-				if err != nil {
-					formatJSONError(w, http.StatusInternalServerError, err.Error())
-					return
-				}
-				data, err := json.Marshal(&events)
-				if err != nil {
-					formatJSONError(w, http.StatusInternalServerError, err.Error())
-					return
-				}
-				w.Write(data)
+			events, err := s.db.GetEvents(int(limit), int(offset))
+			if err != nil {
+				formatJSONError(w, http.StatusInternalServerError, err.Error())
+				return
 			}
+			data, err := json.Marshal(&events)
+			if err != nil {
+				formatJSONError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			w.Write(data)
 		default:
 			formatJSONError(w, http.StatusMethodNotAllowed, fmt.Sprintf("error: '%s' not allowed", r.Method))
 			return
