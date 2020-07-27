@@ -1,11 +1,9 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"os/exec"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -16,9 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	stdlib "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -169,39 +165,6 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 		return nil, err
 	}
 	return events, nil
-}
-
-// DumpEvents executes pg_dump in a child process and returns its stdout.
-func (db *DB) DumpEvents() ([]byte, error) {
-	var connConfig pgx.ConnConfig
-
-	conn, err := db.handle.DB.Conn(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	err = conn.Raw(func(driverConn interface{}) error {
-		conn := driverConn.(*stdlib.Conn).Conn()
-		connConfig = *conn.Config()
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	cmd := exec.Command("pg_dump", "--table", "events", connConfig.Database)
-	cmd.Env = []string{
-		fmt.Sprintf("PGHOST=%v", connConfig.Host),
-		fmt.Sprintf("PGPORT=%v", connConfig.Port),
-		fmt.Sprintf("PGUSER=%v", connConfig.User),
-		fmt.Sprintf("PGPASSWORD=%v", connConfig.Password),
-	}
-
-	data, err := cmd.Output()
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }
 
 // CountAccountsEvents returns the number of records found in the accounts_events
