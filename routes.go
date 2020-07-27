@@ -135,14 +135,14 @@ func (s *Server) handleEvent() http.HandlerFunc {
 		CorePath    *string    `json:"core_path"`
 	}
 	type event struct {
-		Phase       string         `json:"phase"`
-		StartedAt   time.Time      `json:"started_at"`
-		Exit        int            `json:"exit"`
-		Exception   sql.NullString `json:"exception"`
-		EndedAt     time.Time      `json:"ended_at"`
-		MachineID   string         `json:"machine_id"`
-		CoreVersion string         `json:"core_version"`
-		CorePath    string         `json:"core_path"`
+		Phase       string
+		StartedAt   time.Time
+		Exit        int
+		Exception   sql.NullString
+		EndedAt     time.Time
+		MachineID   string
+		CoreVersion string
+		CorePath    string
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -209,13 +209,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
-			{
-				data, err := json.Marshal(&e)
-				if err != nil {
-					log.Errorf("error: failed to Marshal event into JSON: %v", err)
-				}
-				s.events <- data
-			}
+			s.events <- data
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id := identity.Get(r.Context())
