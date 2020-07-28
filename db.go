@@ -154,11 +154,15 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 		event["phase"] = e.Phase
 		event["started_at"] = e.StartedAt
 		event["exit"] = e.Exit
-		event["exception"] = e.Exception
+		if e.Exception.Valid {
+			event["exception"] = e.Exception.String
+		}
 		event["ended_at"] = e.EndedAt
 		event["machine_id"] = e.MachineID
 		event["core_version"] = e.CoreVersion
-		event["core_path"] = e.CorePath
+		if e.CorePath.Valid {
+			event["core_path"] = e.CorePath.String
+		}
 		events = append(events, event)
 	}
 	if err := rows.Err(); err != nil {

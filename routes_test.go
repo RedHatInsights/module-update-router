@@ -82,7 +82,7 @@ func TestRouter(t *testing.T) {
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `[{"core_path":"/etc/insights-client/rpm.egg","core_version":"3.0.156","ended_at":"2020-07-15T17:17:37Z","event_id":"af3b8e13-6b65-45d8-8310-a45e0821bd62","exception":{"String":"","Valid":false},"exit":1,"machine_id":"a9ab0a44-1241-43ae-9c02-1850acf0c36c","phase":"pre_update","started_at":"2020-06-19T11:18:03Z"}]`,
+				body: `[{"core_path":"/etc/insights-client/rpm.egg","core_version":"3.0.156","ended_at":"2020-07-15T17:17:37Z","event_id":"af3b8e13-6b65-45d8-8310-a45e0821bd62","exit":1,"machine_id":"a9ab0a44-1241-43ae-9c02-1850acf0c36c","phase":"pre_update","started_at":"2020-06-19T11:18:03Z"}]`,
 			},
 		},
 		{
@@ -97,7 +97,7 @@ func TestRouter(t *testing.T) {
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `[{"core_path":"/etc/insights-client/rpm.egg","core_version":"3.0.156","ended_at":"2020-07-15T17:17:37Z","event_id":"af3b8e13-6b65-45d8-8310-a45e0821bd62","exception":{"String":"","Valid":false},"exit":1,"machine_id":"a9ab0a44-1241-43ae-9c02-1850acf0c36c","phase":"pre_update","started_at":"2020-06-19T11:18:03Z"},{"core_path":"/var/lib/insights/latest.egg","core_version":"3.0.156","ended_at":"2020-07-21T13:02:31Z","event_id":"89d9352c-0f53-49c0-9f7c-27a9ee3e2dff","exception":{"String":"OSError","Valid":true},"exit":1,"machine_id":"21f3e7da-6e33-41dd-b25f-0eab2242ae27","phase":"pre_update","started_at":"2020-07-21T13:01:04Z"}]`,
+				body: `[{"core_path":"/etc/insights-client/rpm.egg","core_version":"3.0.156","ended_at":"2020-07-15T17:17:37Z","event_id":"af3b8e13-6b65-45d8-8310-a45e0821bd62","exit":1,"machine_id":"a9ab0a44-1241-43ae-9c02-1850acf0c36c","phase":"pre_update","started_at":"2020-06-19T11:18:03Z"},{"core_path":"/var/lib/insights/latest.egg","core_version":"3.0.156","ended_at":"2020-07-21T13:02:31Z","event_id":"89d9352c-0f53-49c0-9f7c-27a9ee3e2dff","exception":"OSError","exit":1,"machine_id":"21f3e7da-6e33-41dd-b25f-0eab2242ae27","phase":"pre_update","started_at":"2020-07-21T13:01:04Z"}]`,
 			},
 		},
 		{
@@ -112,7 +112,7 @@ func TestRouter(t *testing.T) {
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `[{"core_path":"/var/lib/insights/latest.egg","core_version":"3.0.156","ended_at":"2020-07-21T13:02:31Z","event_id":"89d9352c-0f53-49c0-9f7c-27a9ee3e2dff","exception":{"String":"OSError","Valid":true},"exit":1,"machine_id":"21f3e7da-6e33-41dd-b25f-0eab2242ae27","phase":"pre_update","started_at":"2020-07-21T13:01:04Z"}]`,
+				body: `[{"core_path":"/var/lib/insights/latest.egg","core_version":"3.0.156","ended_at":"2020-07-21T13:02:31Z","event_id":"89d9352c-0f53-49c0-9f7c-27a9ee3e2dff","exception":"OSError","exit":1,"machine_id":"21f3e7da-6e33-41dd-b25f-0eab2242ae27","phase":"pre_update","started_at":"2020-07-21T13:01:04Z"}]`,
 			},
 		},
 	}
