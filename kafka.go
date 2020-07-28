@@ -8,7 +8,7 @@ import (
 )
 
 // ProduceMessages consumes the in channel and sends the message
-func ProduceMessages(brokers string, topic string, async bool, events chan []byte) {
+func ProduceMessages(brokers string, topic string, async bool, events *chan []byte) {
 	go func() {
 		w := kafka.NewWriter(kafka.WriterConfig{
 			Brokers:  []string{brokers},
@@ -19,7 +19,7 @@ func ProduceMessages(brokers string, topic string, async bool, events chan []byt
 
 		defer w.Close()
 
-		for v := range events {
+		for v := range *events {
 			go func(v []byte) {
 				err := w.WriteMessages(context.Background(),
 					kafka.Message{
@@ -28,8 +28,8 @@ func ProduceMessages(brokers string, topic string, async bool, events chan []byt
 					},
 				)
 				if err != nil {
-					log.Errorf("error while writing, putting message back into the channel: %v", err)
-					events <- v
+					log.Errorf("message write failed; will try again: %v", err)
+					*events <- v
 					return
 				}
 			}(v)

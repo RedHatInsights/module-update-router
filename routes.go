@@ -30,12 +30,12 @@ type Server struct {
 	mux    *http.ServeMux
 	db     *DB
 	addr   string
-	events chan []byte
+	events *chan []byte
 }
 
 // NewServer creates a new instance of the application, configured with the
 // provided addr, API roots and database handle.
-func NewServer(addr string, apiroots []string, db *DB, events chan []byte) (*Server, error) {
+func NewServer(addr string, apiroots []string, db *DB, events *chan []byte) (*Server, error) {
 	srv := &Server{
 		mux:    &http.ServeMux{},
 		db:     db,
@@ -209,7 +209,9 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
-			s.events <- data
+			if s.events != nil {
+				*s.events <- data
+			}
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id := identity.Get(r.Context())

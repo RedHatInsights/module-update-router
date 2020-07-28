@@ -129,10 +129,15 @@ func main() {
 		apiroots[i] = path.Join(root, appname, apiversion)
 	}
 
-	events := make(chan []byte, eventBuffer)
+	var events *chan []byte
 	if kafkaBootstrap != "" {
+		c := make(chan []byte, eventBuffer)
+		events = &c
 		ProduceMessages(kafkaBootstrap, metricsTopic, true, events)
-		log.Infof("Kafka Producer Initialized for %v on topic %v", kafkaBootstrap, metricsTopic)
+		log.WithFields(log.Fields{
+			"broker": kafkaBootstrap,
+			"topic":  metricsTopic,
+		}).Info("started kafka producer")
 	}
 
 	srv, err := NewServer(addr, apiroots, db, events)
@@ -145,7 +150,7 @@ func main() {
 		log.WithFields(log.Fields{
 			"func": "metrics",
 			"addr": maddr,
-		}).Info("started")
+		}).Info("started http listener")
 		http.ListenAndServe(maddr, promhttp.Handler())
 	}()
 
@@ -153,7 +158,7 @@ func main() {
 		log.WithFields(log.Fields{
 			"func": "app",
 			"addr": addr,
-		}).Info("started")
+		}).Info("started http listener")
 		log.Fatal(srv.ListenAndServe())
 	}()
 
