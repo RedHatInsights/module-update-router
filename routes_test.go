@@ -135,7 +135,7 @@ func TestRouter(t *testing.T) {
 			db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
 			VALUES ("89d9352c-0f53-49c0-9f7c-27a9ee3e2dff", "pre_update", "2020-07-21T13:01:04Z", 1, "OSError", "2020-07-21T13:02:31Z", "21f3e7da-6e33-41dd-b25f-0eab2242ae27", "3.0.156", "/var/lib/insights/latest.egg");`))
 
-			srv, err := NewServer(":8080", []string{"/api/module-update-router/v1"}, db)
+			srv, err := NewServer(":8080", []string{"/api/module-update-router/v1"}, db, nil)
 			if err != nil {
 				t.Fatal(err)
 			}

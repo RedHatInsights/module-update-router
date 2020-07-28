@@ -27,18 +27,20 @@ var r metrics.Recorder = httpmetrics.NewRecorder(httpmetrics.Config{})
 // multiplexer for routing HTTP requests to appropriate handlers and a database
 // handle for looking up application data.
 type Server struct {
-	mux  *http.ServeMux
-	db   *DB
-	addr string
+	mux    *http.ServeMux
+	db     *DB
+	addr   string
+	events *chan []byte
 }
 
 // NewServer creates a new instance of the application, configured with the
 // provided addr, API roots and database handle.
-func NewServer(addr string, apiroots []string, db *DB) (*Server, error) {
+func NewServer(addr string, apiroots []string, db *DB, events *chan []byte) (*Server, error) {
 	srv := &Server{
-		mux:  &http.ServeMux{},
-		db:   db,
-		addr: addr,
+		mux:    &http.ServeMux{},
+		db:     db,
+		addr:   addr,
+		events: events,
 	}
 	srv.routes(apiroots...)
 	return srv, nil
@@ -206,6 +208,9 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.EndedAt, e.MachineID, e.CoreVersion, e.CorePath); err != nil {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
+			}
+			if s.events != nil {
+				*s.events <- data
 			}
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:

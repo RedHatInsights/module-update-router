@@ -17,22 +17,25 @@ import (
 
 func main() {
 	var (
-		addr       string
-		maddr      string
-		logLevel   string
-		logFormat  string
-		pathprefix string
-		appname    string
-		dbDriver   string
-		dbHost     string
-		dbPort     string
-		dbName     string
-		dbUser     string
-		dbPass     string
-		dbURL      string
-		migrate    bool
-		seedpath   string
-		reset      bool
+		addr           string
+		maddr          string
+		logLevel       string
+		logFormat      string
+		pathprefix     string
+		appname        string
+		dbDriver       string
+		dbHost         string
+		dbPort         string
+		dbName         string
+		dbUser         string
+		dbPass         string
+		dbURL          string
+		metricsTopic   string
+		kafkaBootstrap string
+		eventBuffer    int
+		migrate        bool
+		seedpath       string
+		reset          bool
 	)
 
 	const (
@@ -53,6 +56,9 @@ func main() {
 	fs.StringVar(&dbUser, "db-user", "postgres", "database username")
 	fs.StringVar(&dbPass, "db-pass", "", "database user password")
 	fs.StringVar(&dbURL, "database-url", "", "database connection URL")
+	fs.StringVar(&metricsTopic, "metrics-topic", "client-metrics", "topic on which to place metrics data")
+	fs.StringVar(&kafkaBootstrap, "kafka-bootstrap", "", "url of the kafka broker for the cluster")
+	fs.IntVar(&eventBuffer, "event-buffer", 1000, "the size of the event channel buffer")
 	fs.BoolVar(&migrate, "migrate", false, "run migrations")
 	fs.StringVar(&seedpath, "seed-path", "", "path to the SQL seed file")
 	fs.BoolVar(&reset, "reset", false, "drop all tables before running migrations")
@@ -123,7 +129,18 @@ func main() {
 		apiroots[i] = path.Join(root, appname, apiversion)
 	}
 
-	srv, err := NewServer(addr, apiroots, db)
+	var events *chan []byte
+	if kafkaBootstrap != "" {
+		c := make(chan []byte, eventBuffer)
+		events = &c
+		ProduceMessages(kafkaBootstrap, metricsTopic, true, events)
+		log.WithFields(log.Fields{
+			"broker": kafkaBootstrap,
+			"topic":  metricsTopic,
+		}).Info("started kafka producer")
+	}
+
+	srv, err := NewServer(addr, apiroots, db, events)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -133,7 +150,7 @@ func main() {
 		log.WithFields(log.Fields{
 			"func": "metrics",
 			"addr": maddr,
-		}).Info("started")
+		}).Info("started http listener")
 		http.ListenAndServe(maddr, promhttp.Handler())
 	}()
 
@@ -141,7 +158,7 @@ func main() {
 		log.WithFields(log.Fields{
 			"func": "app",
 			"addr": addr,
-		}).Info("started")
+		}).Info("started http listener")
 		log.Fatal(srv.ListenAndServe())
 	}()
 
