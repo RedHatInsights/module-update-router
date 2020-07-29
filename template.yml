@@ -152,3 +152,5 @@ objects:
       PATH_PREFIX: /api,/r/insights/platform
       APP_NAME: module-update-router
       DB_DRIVER: pgx
+      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
+      METRICS_TOPIC: platform.insights.client-metrics
