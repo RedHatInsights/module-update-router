@@ -12,6 +12,10 @@ parameters:
   - name: IMAGE_TAG
     description: The container image tag
     value: latest
+  - name: KAFKA_BOOTSTRAP_HOST
+    value: mq-kafka
+  - name: KAFKA_BOOTSTRAP_PORT
+    value: "29092"
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -152,5 +156,5 @@ objects:
       PATH_PREFIX: /api,/r/insights/platform
       APP_NAME: module-update-router
       DB_DRIVER: pgx
-      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
+      KAFKA_BOOTSTRAP: "${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}"
       METRICS_TOPIC: platform.insights.client-metrics
