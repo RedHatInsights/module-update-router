@@ -118,6 +118,7 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			formatJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		incRequests(resp.URL)
 		w.Write(data)
 	}
 }
@@ -212,6 +213,8 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			if s.events != nil {
 				*s.events <- data
 			}
+			incEvents(e.CoreVersion)
+			observeClientElapsed(e.Phase, e.StartedAt, e.EndedAt)
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id := identity.Get(r.Context())
