@@ -118,6 +118,11 @@ objects:
                   path: /ping
                   port: 8080
                 initialDelaySeconds: 30
+              readinessProbe:
+                httpGet:
+                  path: /ping
+                  port: 8080
+                initialDelaySeconds: 10
           volumes:
             - name: accounts-modules
               secret:
