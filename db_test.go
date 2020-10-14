@@ -47,57 +47,6 @@ func TestDBCount(t *testing.T) {
 	}
 }
 
-func TestCountAccountsEvents(t *testing.T) {
-	tests := []struct {
-		desc  string
-		input struct{ query, accountID, queryParameter string }
-		want  int
-	}{
-		{
-			desc: "account ID present",
-			input: struct {
-				query          string
-				accountID      string
-				queryParameter string
-			}{`INSERT INTO accounts_events (account_id) VALUES ('%s');`, "1", "1"},
-			want: 1,
-		},
-		{
-			desc: "account ID absent",
-			input: struct {
-				query          string
-				accountID      string
-				queryParameter string
-			}{`INSERT INTO accounts_events (account_id) VALUES ('%s');`, "1", "2"},
-			want: 0,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.desc, func(t *testing.T) {
-			db, err := Open("sqlite3", "file::memory:?cache=shared")
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer db.Close()
-			if err := db.Migrate(false); err != nil {
-				t.Fatal(err)
-			}
-			if err := db.seedData([]byte(fmt.Sprintf(test.input.query, test.input.accountID))); err != nil {
-				t.Fatal(err)
-			}
-
-			got, err := db.CountAccountsEvents(test.input.queryParameter)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got != test.want {
-				t.Errorf("%+v != %+v", got, test.want)
-			}
-		})
-	}
-}
-
 func TestDBInsertEvents(t *testing.T) {
 	type record struct {
 		phase       string
