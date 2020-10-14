@@ -1,3 +1,8 @@
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/redhatinsights/module-update-router)](https://pkg.go.dev/github.com/redhatinsights/module-update-router)
+[![Build Status](https://travis-ci.org/redhatinsights/module-update-router.svg?branch=master)](https://travis-ci.org/redhatinsights/module-update-router)
+[![Go Report Card](https://goreportcard.com/badge/github.com/redhatinsights/module-update-router)](https://goreportcard.com/report/github.com/redhatinsights/module-update-router)
+[![Coverage Status](https://coveralls.io/repos/github/redhatinsights/module-update-router/badge.svg)](https://coveralls.io/github/redhatinsights/module-update-router)
+
 module-update-router is a microservice that determines whether a client should
 fetch a testing/prerelease module or a released/production module. It maintains
 a list of account IDs internally and will respond to GET requests to `/api/v1/channel?module=<module-name>`
