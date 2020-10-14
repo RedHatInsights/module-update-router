@@ -77,7 +77,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event?limit=1",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -92,7 +92,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -107,7 +107,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event?offset=1&limit=1",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
