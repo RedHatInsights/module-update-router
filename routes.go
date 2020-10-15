@@ -218,12 +218,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id := identity.Get(r.Context())
-			count, err := s.db.CountAccountsEvents(id.Identity.AccountNumber)
-			if err != nil {
-				formatJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-			if count < 1 {
+			if id.Identity.Type != "Associate" {
 				formatJSONError(w, http.StatusUnauthorized, "")
 				return
 			}

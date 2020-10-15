@@ -77,7 +77,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event?limit=1",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -92,7 +92,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -107,7 +107,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event?offset=1&limit=1",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -129,7 +129,6 @@ func TestRouter(t *testing.T) {
 				t.Fatal(err)
 			}
 			db.seedData([]byte(`INSERT INTO accounts_modules (account_id, module_name) VALUES ('540155', 'insights-core');`))
-			db.seedData([]byte(`INSERT INTO accounts_events (account_id) VALUES ('540155');`))
 			db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
 			VALUES ("af3b8e13-6b65-45d8-8310-a45e0821bd62", "pre_update", "2020-06-19T11:18:03Z", 1, NULL, "2020-07-15T17:17:37Z", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", "/etc/insights-client/rpm.egg");`))
 			db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
