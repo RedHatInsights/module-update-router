@@ -11,7 +11,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/module-update-router/identity"
+
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/slok/go-http-metrics/metrics"
@@ -105,8 +106,16 @@ func (s *Server) handleChannel() http.HandlerFunc {
 		resp := response{
 			URL: "/release",
 		}
-		id := identity.Get(r.Context())
-		count, err := s.db.Count(module, id.Identity.AccountNumber)
+		id, err := identity.GetIdentity(r)
+		if err != nil {
+			formatJSONError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		if id.Identity.AccountNumber == nil {
+			formatJSONError(w, http.StatusBadRequest, "missing account_number identity field")
+			return
+		}
+		count, err := s.db.Count(module, *id.Identity.AccountNumber)
 		if err != nil {
 			log.Error(err)
 		}
@@ -217,7 +226,11 @@ func (s *Server) handleEvent() http.HandlerFunc {
 			observeClientElapsed(e.Phase, e.StartedAt, e.EndedAt)
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
-			id := identity.Get(r.Context())
+			id, err := identity.GetIdentity(r)
+			if err != nil {
+				formatJSONError(w, http.StatusInternalServerError, err.Error())
+				return
+			}
 			if id.Identity.Type != "Associate" {
 				formatJSONError(w, http.StatusUnauthorized, "")
 				return
@@ -317,7 +330,7 @@ func (s *Server) requestID(next http.HandlerFunc) http.HandlerFunc {
 // X-Rh-Identity header is present in the request.
 func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		identity.EnforceIdentity(next).ServeHTTP(w, r)
+		identity.Identify(next).ServeHTTP(w, r)
 	}
 }
 
