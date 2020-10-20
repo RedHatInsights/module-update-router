@@ -128,6 +128,7 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			return
 		}
 		incRequests(resp.URL)
+		w.Header().Add("Content-Type", "application/json")
 		w.Write(data)
 	}
 }
@@ -277,6 +278,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
+			w.Header().Add("Content-Type", "application/json")
 			w.Write(data)
 		default:
 			formatJSONError(w, http.StatusMethodNotAllowed, fmt.Sprintf("error: '%s' not allowed", r.Method))
