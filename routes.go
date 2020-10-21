@@ -306,6 +306,11 @@ func (s *Server) log(next http.HandlerFunc) http.HandlerFunc {
 			level = log.InfoLevel
 		}
 
+		responseBody := rr.Body.String()
+		if len(responseBody) > 1024 {
+			responseBody = responseBody[:1024]
+		}
+
 		log.WithFields(logrus.Fields{
 			"ident":      r.Host,
 			"method":     r.Method,
@@ -313,7 +318,7 @@ func (s *Server) log(next http.HandlerFunc) http.HandlerFunc {
 			"url":        r.URL.String(),
 			"user-agent": r.UserAgent(),
 			"status":     rr.Code,
-			"response":   rr.Body.String(),
+			"response":   responseBody,
 			"duration":   time.Since(start),
 			"request-id": r.Header.Get("X-Request-Id"),
 		}).Log(level)
