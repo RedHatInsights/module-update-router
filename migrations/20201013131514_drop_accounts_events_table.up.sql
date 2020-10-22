@@ -1,1 +1,1 @@
-DROP TABLE accounts_events;
+DROP TABLE IF EXISTS accounts_events;
