@@ -20,7 +20,7 @@ var (
 
 	clientElapsed = pa.NewHistogramVec(p.HistogramOpts{
 		Name: "module_update_router_client_seconds",
-		Help: "The number of seconds a client",
+		Help: "The number of seconds a client request takes",
 	}, []string{"phase"})
 )
 
