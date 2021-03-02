@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/peterbourgon/ff/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -145,6 +146,26 @@ func main() {
 		log.Fatal(err)
 	}
 	defer srv.Close()
+
+	go func() {
+		log.WithFields(log.Fields{
+			"func": "db_trim",
+		}).Info("started database trimmer")
+		for {
+			time.Sleep(1 * time.Hour)
+			rows, err := db.DeleteEvents(time.Now().UTC().Add(-30 * 24 * time.Hour))
+			if err != nil {
+				log.WithFields(log.Fields{
+					"func":  "db_trim",
+					"error": err,
+				}).Error("deleting events")
+			}
+			log.WithFields(log.Fields{
+				"func": "db_trim",
+				"rows": rows,
+			}).Info("deleted rows")
+		}
+	}()
 
 	go func() {
 		log.WithFields(log.Fields{
