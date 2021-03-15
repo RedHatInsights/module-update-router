@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestDBCount(t *testing.T) {
@@ -226,6 +227,97 @@ func TestDBGetEvents(t *testing.T) {
 			}
 			if !cmp.Equal(got, test.want) {
 				t.Errorf("%v", cmp.Diff(got, test.want))
+			}
+		})
+	}
+}
+
+func TestDeleteEvents(t *testing.T) {
+	tests := []struct {
+		description string
+		input       struct {
+			seed []string
+			date time.Time
+		}
+		want      int64
+		wantError error
+	}{
+		{
+			description: "3 events, 3 older",
+			input: struct {
+				seed []string
+				date time.Time
+			}{
+				seed: []string{
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("a775eb95-baa0-48ef-80a5-438adfefca85", "pre_update", "2020-07-15T17:16:55+00:00", 1, NULL, "2020-07-15T17:17:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("6d7d9b1b-60bf-4523-b5df-db6c9a2e3e4b", "pre_update", "2020-07-15T17:18:55+00:00", 1, NULL, "2020-07-15T17:19:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("7f4cfe4b-415a-478e-98d7-ec232a8cf181", "pre_update", "2020-07-15T17:20:55+00:00", 1, NULL, "2020-07-15T17:21:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+				},
+				date: time.Date(2020, time.July, 15, 17, 21, 00, 00, time.UTC),
+			},
+			want: 3,
+		},
+		{
+			description: "3 events, 1 older",
+			input: struct {
+				seed []string
+				date time.Time
+			}{
+				seed: []string{
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("a775eb95-baa0-48ef-80a5-438adfefca85", "pre_update", "2020-07-15T17:16:55+00:00", 1, NULL, "2020-07-15T17:17:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("6d7d9b1b-60bf-4523-b5df-db6c9a2e3e4b", "pre_update", "2020-07-15T17:18:55+00:00", 1, NULL, "2020-07-15T17:19:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("7f4cfe4b-415a-478e-98d7-ec232a8cf181", "pre_update", "2020-07-15T17:20:55+00:00", 1, NULL, "2020-07-15T17:21:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+				},
+				date: time.Date(2020, time.July, 15, 17, 17, 00, 00, time.UTC),
+			},
+			want: 1,
+		},
+		{
+			description: "3 events, 0 older",
+			input: struct {
+				seed []string
+				date time.Time
+			}{
+				seed: []string{
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("a775eb95-baa0-48ef-80a5-438adfefca85", "pre_update", "2020-07-15T17:16:55+00:00", 1, NULL, "2020-07-15T17:17:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("6d7d9b1b-60bf-4523-b5df-db6c9a2e3e4b", "pre_update", "2020-07-15T17:18:55+00:00", 1, NULL, "2020-07-15T17:19:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+					`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ("7f4cfe4b-415a-478e-98d7-ec232a8cf181", "pre_update", "2020-07-15T17:20:55+00:00", 1, NULL, "2020-07-15T17:21:37+00:00", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", NULL);`,
+				},
+				date: time.Date(2020, time.July, 15, 17, 15, 00, 00, time.UTC),
+			},
+			want: 0,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			if err := db.Migrate(false); err != nil {
+				t.Fatal(err)
+			}
+			for _, q := range test.input.seed {
+				if err := db.seedData([]byte(q)); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			got, err := db.DeleteEvents(test.input.date)
+
+			if test.wantError != nil {
+				if !cmp.Equal(err, test.wantError, cmpopts.EquateErrors()) {
+					t.Errorf("%#v != %#v", err, test.wantError)
+				}
+			} else {
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !cmp.Equal(got, test.want) {
+					t.Errorf("%#v != %#v", got, test.want)
+				}
 			}
 		})
 	}

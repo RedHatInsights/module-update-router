@@ -171,6 +171,24 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 	return events, nil
 }
 
+// DeleteEvents deletes all rows from the events table that have a started_at
+// date older than the given time and returns the number of rows deleted.
+func (db *DB) DeleteEvents(older time.Time) (int64, error) {
+	stmt, err := db.preparedStatement(`DELETE FROM events WHERE started_at < $1;`)
+
+	result, err := stmt.Exec(older.Format(time.RFC3339))
+	if err != nil {
+		return -1, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return -1, err
+	}
+
+	return rowsAffected, nil
+}
+
 // Migrate inspects the current active migration version and runs all necessary
 // steps to migrate all the way up. If reset is true, everything is deleted in
 // the database before applying migrations.
