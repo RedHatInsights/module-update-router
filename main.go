@@ -154,7 +154,6 @@ func main() {
 			"routine": "db_trim",
 		}).Info("started database trimmer")
 		for {
-			time.Sleep(1 * time.Hour)
 			rows, err := db.DeleteEvents(time.Now().UTC().Add(-30 * 24 * time.Hour))
 			if err != nil {
 				log.WithFields(log.Fields{
@@ -166,6 +165,7 @@ func main() {
 				"routine": "db_trim",
 				"rows":    rows,
 			}).Info("deleted rows")
+			time.Sleep(1 * time.Hour)
 		}
 	}()
 
