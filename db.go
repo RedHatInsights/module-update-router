@@ -34,11 +34,11 @@ type DB struct {
 func Open(driverName, dataSourceName string) (*DB, error) {
 	handle, err := sqlx.Open(driverName, dataSourceName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db: sqlx.Open failed: %w", err)
 	}
 
 	if err := handle.Ping(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db: handle.Ping failed: %w", err)
 	}
 
 	return &DB{
@@ -62,13 +62,13 @@ func (db *DB) Close() error {
 func (db *DB) Count(moduleName, accountID string) (int, error) {
 	stmt, err := db.preparedStatement(`SELECT COUNT(*) FROM accounts_modules WHERE module_name = $1 AND account_id = $2;`)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("db: db.preparedStatement failed: %w", err)
 	}
 
 	var count int
 	err = stmt.QueryRow(moduleName, accountID).Scan(&count)
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("db: stmt.QueryRow failed: %w", err)
 	}
 	return count, nil
 }
@@ -79,11 +79,11 @@ func (db *DB) Count(moduleName, accountID string) (int, error) {
 func (db *DB) InsertAccountsModules(moduleName, accountID string) error {
 	stmt, err := db.preparedStatement(`INSERT INTO accounts_modules (module_name, account_id) VALUES ($1, $2);`)
 	if err != nil {
-		return err
+		return fmt.Errorf("db: db.preparedStatement failed: %w", err)
 	}
 	_, err = stmt.Exec(moduleName, accountID)
 	if err != nil {
-		return err
+		return fmt.Errorf("db: stmt.Exec failed: %w", err)
 	}
 
 	return nil
@@ -93,17 +93,17 @@ func (db *DB) InsertAccountsModules(moduleName, accountID string) error {
 func (db *DB) InsertEvents(phase string, startedAt time.Time, exit int, exception sql.NullString, endedAt time.Time, machineID string, coreVersion string, corePath string) error {
 	eventID, err := uuid.NewUUID()
 	if err != nil {
-		return err
+		return fmt.Errorf("db: uuid.NewUUID failed: %w", err)
 	}
 
 	stmt, err := db.preparedStatement(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`)
 	if err != nil {
-		return err
+		return fmt.Errorf("db: db.preparedStatement failed: %w", err)
 	}
 
 	_, err = stmt.Exec(eventID.String(), phase, startedAt, exit, exception, endedAt, machineID, coreVersion, corePath)
 	if err != nil {
-		return err
+		return fmt.Errorf("db: stmt.Exec failed: %w", err)
 	}
 
 	return nil
@@ -127,19 +127,19 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 		var err error
 		stmt, err = db.preparedStatement(`SELECT * FROM events ORDER BY started_at;`)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("db: db.preparedStatement failed: %w", err)
 		}
 	} else {
 		var err error
 		stmt, err = db.preparedStatement(fmt.Sprintf(`SELECT * FROM events ORDER BY started_at LIMIT %v OFFSET %v;`, limit, offset))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("db: db.preparedStatement failed: %w", err)
 		}
 	}
 
 	rows, err := stmt.Queryx()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db: stmt.Queryx failed: %w", err)
 	}
 	defer rows.Close()
 
@@ -147,7 +147,7 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 	for rows.Next() {
 		var e event
 		if err := rows.StructScan(&e); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("db: rows.StructScan failed: %w", err)
 		}
 		event := make(map[string]interface{})
 		event["event_id"] = e.EventID
@@ -166,7 +166,7 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 		events = append(events, event)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db: rows.Err failed: %w", err)
 	}
 	return events, nil
 }
@@ -178,12 +178,12 @@ func (db *DB) DeleteEvents(older time.Time) (int64, error) {
 
 	result, err := stmt.Exec(older.Format(time.RFC3339))
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("db: stmt.Exec failed: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("db: result.RowsAffected failed: %w", err)
 	}
 
 	return rowsAffected, nil
@@ -195,12 +195,12 @@ func (db *DB) DeleteEvents(older time.Time) (int64, error) {
 func (db *DB) Migrate(reset bool) error {
 	m, err := newMigrate(db.handle.DB, db.driverName)
 	if err != nil {
-		return err
+		return fmt.Errorf("db: newMigrate failed: %w", err)
 	}
 
 	if reset {
 		if err := m.Drop(); err != nil {
-			return err
+			return fmt.Errorf("db: m.Drop failed: %w", err)
 		}
 		// After calling Drop, we need to ensure the schema_migrations table
 		// exists. In the postgres driver, an unexported function, ensureVersionTable,
@@ -208,7 +208,7 @@ func (db *DB) Migrate(reset bool) error {
 		// Migrate instance.
 		m, err = newMigrate(db.handle.DB, db.driverName)
 		if err != nil {
-			return err
+			return fmt.Errorf("db: newMigrate failed: %w", err)
 		}
 	}
 
@@ -216,7 +216,7 @@ func (db *DB) Migrate(reset bool) error {
 		if err == migrate.ErrNoChange {
 			return nil
 		}
-		return err
+		return fmt.Errorf("db: m.Up failed: %w", err)
 	}
 	return nil
 }
@@ -225,7 +225,7 @@ func (db *DB) Migrate(reset bool) error {
 func (db *DB) Seed(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("db: ioutil.ReadFile failed: %w", err)
 	}
 	return db.seedData(data)
 }
@@ -233,7 +233,7 @@ func (db *DB) Seed(path string) error {
 func (db *DB) seedData(data []byte) error {
 	_, err := db.handle.Exec(string(data))
 	if err != nil {
-		return err
+		return fmt.Errorf("db: db.handle.Exec failed: %w", err)
 	}
 	return nil
 }
@@ -248,7 +248,7 @@ func (db *DB) preparedStatement(query string) (*sqlx.Stmt, error) {
 	}
 	stmt, err := db.handle.Preparex(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db: db.handle.Preparex failed: %w", err)
 	}
 	db.statements[query] = stmt
 	return stmt, nil
@@ -261,18 +261,18 @@ func newMigrate(db *sql.DB, driverName string) (*migrate.Migrate, error) {
 	case "pgx":
 		driver, err = postgres.WithInstance(db, &postgres.Config{})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("db: postgres.WithInstance failed: %w", err)
 		}
 	case "sqlite3":
 		driver, err = sqlite3.WithInstance(db, &sqlite3.Config{})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("db: sqlite3.WithInstance failed: %w", err)
 		}
 	}
 
 	m, err := migrate.NewWithDatabaseInstance("file://./migrations", driverName, driver)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db: migrate.NewithDatabaseInstance failed: %w", err)
 	}
 
 	return m, nil
