@@ -83,6 +83,8 @@ func main() {
 	}
 	log.SetLevel(lvl)
 
+	log.SetReportCaller(true)
+
 	var connString string
 	switch dbDriver {
 	case "pgx":
