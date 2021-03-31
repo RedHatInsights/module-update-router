@@ -151,36 +151,36 @@ func main() {
 
 	go func() {
 		log.WithFields(log.Fields{
-			"func": "db_trim",
+			"routine": "db_trim",
 		}).Info("started database trimmer")
 		for {
 			time.Sleep(1 * time.Hour)
 			rows, err := db.DeleteEvents(time.Now().UTC().Add(-30 * 24 * time.Hour))
 			if err != nil {
 				log.WithFields(log.Fields{
-					"func":  "db_trim",
-					"error": err,
+					"routine": "db_trim",
+					"error":   err,
 				}).Error("deleting events")
 			}
 			log.WithFields(log.Fields{
-				"func": "db_trim",
-				"rows": rows,
+				"routine": "db_trim",
+				"rows":    rows,
 			}).Info("deleted rows")
 		}
 	}()
 
 	go func() {
 		log.WithFields(log.Fields{
-			"func": "metrics",
-			"addr": maddr,
+			"routine": "metrics",
+			"addr":    maddr,
 		}).Info("started http listener")
 		http.ListenAndServe(maddr, promhttp.Handler())
 	}()
 
 	go func() {
 		log.WithFields(log.Fields{
-			"func": "app",
-			"addr": addr,
+			"routine": "app",
+			"addr":    addr,
 		}).Info("started http listener")
 		log.Fatal(srv.ListenAndServe())
 	}()
