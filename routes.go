@@ -74,7 +74,9 @@ func (s *Server) routes(prefixes ...string) {
 // /ping.
 func (s *Server) handlePing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`OK`))
+		if _, err := w.Write([]byte(`OK`)); err != nil {
+			log.Errorf("cannot write HTTP response: %v", err)
+		}
 	}
 }
 
@@ -129,7 +131,9 @@ func (s *Server) handleChannel() http.HandlerFunc {
 		}
 		incRequests(resp.URL)
 		w.Header().Add("Content-Type", "application/json")
-		w.Write(data)
+		if _, err := w.Write(data); err != nil {
+			log.Errorf("cannot write HTTP response: %v", err)
+		}
 	}
 }
 
@@ -279,7 +283,9 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				return
 			}
 			w.Header().Add("Content-Type", "application/json")
-			w.Write(data)
+			if _, err := w.Write(data); err != nil {
+				log.Errorf("cannot write HTTP response: %v", err)
+			}
 		default:
 			formatJSONError(w, http.StatusMethodNotAllowed, fmt.Sprintf("error: '%s' not allowed", r.Method))
 			return

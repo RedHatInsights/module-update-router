@@ -64,7 +64,9 @@ func main() {
 	fs.StringVar(&seedpath, "seed-path", "", "path to the SQL seed file")
 	fs.BoolVar(&reset, "reset", false, "drop all tables before running migrations")
 
-	ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix())
+	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
+		log.Fatalf("error: failed to parse flags: %v", err)
+	}
 
 	if dbURL == "" && (dbHost == "" || dbPort == "" || dbName == "" || dbUser == "") {
 		log.Fatal("error: unable to connect to database. See -help for details")
@@ -174,7 +176,9 @@ func main() {
 			"routine": "metrics",
 			"addr":    maddr,
 		}).Info("started http listener")
-		http.ListenAndServe(maddr, promhttp.Handler())
+		if err := http.ListenAndServe(maddr, promhttp.Handler()); err != nil {
+			log.Fatalf("error: failed to listen to addr (%v): %v", maddr, err)
+		}
 	}()
 
 	go func() {
