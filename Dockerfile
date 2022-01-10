@@ -1,4 +1,4 @@
-FROM quay.io/app-sre/golang:1.13
+FROM quay.io/app-sre/golang:1.16
 
 WORKDIR /go/src/app
 COPY . .
