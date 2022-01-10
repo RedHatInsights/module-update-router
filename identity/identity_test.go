@@ -151,7 +151,9 @@ func TestIdentify(t *testing.T) {
 					formatJSONError(w, http.StatusInternalServerError, err.Error())
 					return
 				}
-				w.Write(data)
+				if _, err := w.Write(data); err != nil {
+					t.Error(err)
+				}
 			}))
 			handler.ServeHTTP(rr, req)
 			got := response{rr.Code, rr.Body.String()}

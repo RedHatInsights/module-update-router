@@ -128,11 +128,17 @@ func TestRouter(t *testing.T) {
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
-			db.seedData([]byte(`INSERT INTO accounts_modules (account_id, module_name) VALUES ('540155', 'insights-core');`))
-			db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
-			VALUES ("af3b8e13-6b65-45d8-8310-a45e0821bd62", "pre_update", "2020-06-19T11:18:03Z", 1, NULL, "2020-07-15T17:17:37Z", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", "/etc/insights-client/rpm.egg");`))
-			db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
-			VALUES ("89d9352c-0f53-49c0-9f7c-27a9ee3e2dff", "pre_update", "2020-07-21T13:01:04Z", 1, "OSError", "2020-07-21T13:02:31Z", "21f3e7da-6e33-41dd-b25f-0eab2242ae27", "3.0.156", "/var/lib/insights/latest.egg");`))
+			if err := db.seedData([]byte(`INSERT INTO accounts_modules (account_id, module_name) VALUES ('540155', 'insights-core');`)); err != nil {
+				t.Fatal(err)
+			}
+			if err := db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
+			VALUES ("af3b8e13-6b65-45d8-8310-a45e0821bd62", "pre_update", "2020-06-19T11:18:03Z", 1, NULL, "2020-07-15T17:17:37Z", "a9ab0a44-1241-43ae-9c02-1850acf0c36c", "3.0.156", "/etc/insights-client/rpm.egg");`)); err != nil {
+				t.Fatal(err)
+			}
+			if err := db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)
+			VALUES ("89d9352c-0f53-49c0-9f7c-27a9ee3e2dff", "pre_update", "2020-07-21T13:01:04Z", 1, "OSError", "2020-07-21T13:02:31Z", "21f3e7da-6e33-41dd-b25f-0eab2242ae27", "3.0.156", "/var/lib/insights/latest.egg");`)); err != nil {
+				t.Fatal(err)
+			}
 
 			srv, err := NewServer(":8080", []string{"/api/module-update-router/v1"}, db, nil)
 			if err != nil {
