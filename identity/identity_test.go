@@ -165,7 +165,7 @@ func TestIdentify(t *testing.T) {
 	}
 }
 
-func TestFunc(t *testing.T) {
+func TetGetIdentity(t *testing.T) {
 	tests := []struct {
 		description string
 		input       *http.Request
