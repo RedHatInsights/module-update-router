@@ -112,6 +112,8 @@ func main() {
 					id.Identity.User.FirstName = userFlags.FirstName
 					id.Identity.User.LastName = userFlags.LastName
 					id.Identity.User.IsInternal = userFlags.IsInternal
+					id.Identity.Internal = newInternal()
+					id.Identity.Internal.OrgID = internalFlags.OrgID
 
 					data, err := json.Marshal(id)
 					if err != nil {
