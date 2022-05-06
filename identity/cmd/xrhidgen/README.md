@@ -36,3 +36,7 @@ $ xrhidgen user -email someuser@redhat.com
 $ xrhidgen system | base64 -w0
 eyJpZGVudGl0eSI6eyJ0eXBlIjoiU3lzdGVtIiwiYXV0aF90eXBlIjoiY2VydC1hdXRoIiwiYWNjb3VudF9udW1iZXIiOiIxMTEwMDAiLCJzeXN0ZW0iOnsiY24iOiI3NjBlNGE5Yi1jMGNjLTQ1MzgtOGI4Yy0wOWQxYTYzMzVkZDIifX19Cg==
 ```
+
+```
+ht GET http://localhost:8080/api/module-update-router/v1/channel?module=insights-core "X-Rh-Identity: $(xrhidgen system | base64 -w0)"
+```
