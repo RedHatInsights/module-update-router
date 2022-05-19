@@ -4,7 +4,7 @@ requests to console.redhat.com services.
 # Installation
 
 ```
-go install github.com/RedHatInsights/module-update-router/identity/cmd/xrhidgen@latest
+go install github.com/redhatinsights/module-update-router/identity/cmd/xrhidgen@latest
 ```
 
 # Usage
