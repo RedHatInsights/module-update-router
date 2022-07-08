@@ -14,44 +14,59 @@ var identityKey = struct{}{}
 type Identity struct {
 	Entitlements interface{} `json:"entitlements,omitempty"`
 	Identity     struct {
-		AccountNumber *string `json:"account_number,omitempty"`
-		Associate     *struct {
-			Email     string   `json:"email"`
-			GivenName string   `json:"givenName"`
-			RHatUUID  string   `json:"rhatUUID"`
-			Role      []string `json:"Role"`
-			Surname   string   `json:"surname"`
-		} `json:"associate,omitempty"`
-		AuthType              string `json:"auth_type,omitempty"`
-		EmployeeAccountNumber string `json:"employee_account_number,omitempty"`
-		Internal              *struct {
-			AuthTime    float32 `json:"auth_time,omitempty"`
-			CrossAccess bool    `json:"cross_access,omitempty"`
-			OrgID       string  `json:"org_id"`
-		} `json:"internal,omitempty"`
-		OrgID  string `json:"org_id"`
-		System *struct {
-			CertType  string `json:"cert_type,omitempty"`
-			ClusterID string `json:"cluster_id,omitempty"`
-			CN        string `json:"cn"`
-		} `json:"system,omitempty"`
-		Type string `json:"type,omitempty"`
-		User *struct {
-			Email      string `json:"email"`
-			FirstName  string `json:"first_name"`
-			IsActive   bool   `json:"is_active"`
-			IsInternal bool   `json:"is_internal"`
-			IsOrgAdmin bool   `json:"is_org_admin"`
-			LastName   string `json:"last_name"`
-			Locale     string `json:"locale"`
-			UserID     string `json:"user_id"`
-			Username   string `json:"username"`
-		} `json:"user,omitempty"`
-		X509 *struct {
-			SubjectDN string `json:"subject_dn"`
-			IssuerDN  string `json:"issuer_dn"`
-		} `json:"x509,omitempty"`
+		AccountNumber         *string    `json:"account_number,omitempty"`
+		Associate             *Associate `json:"associate,omitempty"`
+		AuthType              string     `json:"auth_type,omitempty"`
+		EmployeeAccountNumber *string    `json:"employee_account_number,omitempty"`
+		Internal              *Internal  `json:"internal,omitempty"`
+		OrgID                 string     `json:"org_id"`
+		System                *System    `json:"system,omitempty"`
+		Type                  *string    `json:"type,omitempty"`
+		User                  *User      `json:"user,omitempty"`
+		X509                  *X509      `json:"x509,omitempty"`
 	} `json:"identity"`
+}
+
+// Associate is an embedded data structure for associate-type identifications.
+type Associate struct {
+	Email     string   `json:"email"`
+	GivenName string   `json:"givenName"`
+	RHatUUID  string   `json:"rhatUUID"`
+	Role      []string `json:"Role"`
+	Surname   string   `json:"surname"`
+}
+
+// Internal is an embedded data structure for internal-type identifications.
+type Internal struct {
+	AuthTime    *float64 `json:"auth_time,omitempty"`
+	CrossAccess *bool    `json:"cross_access,omitempty"`
+	OrgID       string   `json:"org_id"`
+}
+
+// System is an embedded data structure for system-type identifications.
+type System struct {
+	CertType  *string `json:"cert_type,omitempty"`
+	ClusterID *string `json:"cluster_id,omitempty"`
+	CN        string  `json:"cn"`
+}
+
+// User is an embedded data structure for user-type identifications.
+type User struct {
+	Email      string `json:"email"`
+	FirstName  string `json:"first_name"`
+	IsActive   bool   `json:"is_active"`
+	IsInternal bool   `json:"is_internal"`
+	IsOrgAdmin bool   `json:"is_org_admin"`
+	LastName   string `json:"last_name"`
+	Locale     string `json:"locale"`
+	UserID     string `json:"user_id"`
+	Username   string `json:"username"`
+}
+
+// X509 is an embedded data structure for x509-type identifications.
+type X509 struct {
+	SubjectDN string `json:"subject_dn"`
+	IssuerDN  string `json:"issuer_dn"`
 }
 
 // Identify returns an http.HandlerFunc that examines the request for the

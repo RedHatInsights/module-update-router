@@ -236,7 +236,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 				formatJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
-			if id.Identity.Type != "Associate" {
+			if *id.Identity.Type != "Associate" {
 				formatJSONError(w, http.StatusUnauthorized, "")
 				return
 			}
