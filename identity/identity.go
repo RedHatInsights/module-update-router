@@ -10,36 +10,43 @@ import (
 
 var identityKey = struct{}{}
 
-// Identity is the identification object set by Cloud Platform 3scale.
+// Identity is the identification data structure set by Cloud Platform 3scale.
 type Identity struct {
 	Entitlements interface{} `json:"entitlements,omitempty"`
 	Identity     struct {
-		Type          string  `json:"type,omitempty"`
-		AuthType      string  `json:"auth_type,omitempty"`
 		AccountNumber *string `json:"account_number,omitempty"`
-		User          *struct {
-			IsActive   bool   `json:"is_active"`
-			Locale     string `json:"locale"`
-			IsOrgAdmin bool   `json:"is_org_admin"`
-			Username   string `json:"username"`
-			Email      string `json:"email"`
-			FirstName  string `json:"first_name"`
-			LastName   string `json:"last_name"`
-			IsInternal bool   `json:"is_internal"`
-		} `json:"user,omitempty"`
-		Internal *struct {
-			OrgID string `json:"org_id"`
-		} `json:"internal,omitempty"`
-		System *struct {
-			CN string `json:"cn"`
-		} `json:"system,omitempty"`
-		Associate *struct {
-			Role      []string `json:"Role"`
+		Associate     *struct {
 			Email     string   `json:"email"`
 			GivenName string   `json:"givenName"`
 			RHatUUID  string   `json:"rhatUUID"`
+			Role      []string `json:"Role"`
 			Surname   string   `json:"surname"`
 		} `json:"associate,omitempty"`
+		AuthType              string `json:"auth_type,omitempty"`
+		EmployeeAccountNumber string `json:"employee_account_number,omitempty"`
+		Internal              *struct {
+			AuthTime    float32 `json:"auth_time,omitempty"`
+			CrossAccess bool    `json:"cross_access,omitempty"`
+			OrgID       string  `json:"org_id"`
+		} `json:"internal,omitempty"`
+		OrgID  string `json:"org_id"`
+		System *struct {
+			CertType  string `json:"cert_type,omitempty"`
+			ClusterID string `json:"cluster_id,omitempty"`
+			CN        string `json:"cn"`
+		} `json:"system,omitempty"`
+		Type string `json:"type,omitempty"`
+		User *struct {
+			Email      string `json:"email"`
+			FirstName  string `json:"first_name"`
+			IsActive   bool   `json:"is_active"`
+			IsInternal bool   `json:"is_internal"`
+			IsOrgAdmin bool   `json:"is_org_admin"`
+			LastName   string `json:"last_name"`
+			Locale     string `json:"locale"`
+			UserID     string `json:"user_id"`
+			Username   string `json:"username"`
+		} `json:"user,omitempty"`
 		X509 *struct {
 			SubjectDN string `json:"subject_dn"`
 			IssuerDN  string `json:"issuer_dn"`

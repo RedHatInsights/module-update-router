@@ -49,7 +49,7 @@ func TestIdentify(t *testing.T) {
 			},
 		},
 		{
-			description: "bad base64",
+			description: "invalid base64",
 			input: request{
 				headers: map[string]string{
 					"X-Rh-Identity": "0xdeadbeef",
@@ -61,7 +61,7 @@ func TestIdentify(t *testing.T) {
 			},
 		},
 		{
-			description: "bad json",
+			description: "invalid json",
 			input: request{
 				headers: map[string]string{
 					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{`)),
@@ -73,63 +73,63 @@ func TestIdentify(t *testing.T) {
 			},
 		},
 		{
-			description: "good - user",
+			description: "user",
 			input: request{
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"type":"User","user":{"is_active":true,"locale":"en_US","is_org_admin":false,"username":"jsmith","email":"jsmith@redhat.com","first_name":"John","last_name":"Smith","is_internal":false}}}`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"org_id":"12345","user":{"email":"jsmith@redhat.com","first_name":"John","is_active":true,"is_internal":true,"is_org_admin":false,"last_name":"Smith","locale":"en_US","user_id":"jsmith","username":"jsmith"}}}`)),
 				},
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `{"identity":{"type":"User","user":{"is_active":true,"locale":"en_US","is_org_admin":false,"username":"jsmith","email":"jsmith@redhat.com","first_name":"John","last_name":"Smith","is_internal":false}}}`,
+				body: `{"identity":{"org_id":"12345","user":{"email":"jsmith@redhat.com","first_name":"John","is_active":true,"is_internal":true,"is_org_admin":false,"last_name":"Smith","locale":"en_US","user_id":"jsmith","username":"jsmith"}}}`,
 			},
 		},
 		{
-			description: "good - internal",
+			description: "internal",
 			input: request{
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"type":"Internal","internal":{"org_id":"1"},"account_number":"1"}}`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"internal":{"auth_time":1,"cross_access":true,"org_id":"12345"},"org_id":"12345"}}`)),
 				},
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `{"identity":{"type":"Internal","account_number":"1","internal":{"org_id":"1"}}}`,
+				body: `{"identity":{"internal":{"auth_time":1,"cross_access":true,"org_id":"12345"},"org_id":"12345"}}`,
 			},
 		},
 		{
-			description: "good - system",
+			description: "system",
 			input: request{
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"type":"System","system":{"cn":"a4e67559-1cb5-43e3-bcf7-cb2b0c196bac"}}}`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"org_id":"12345","system":{"cert_type":"consumer","cluster_id":"1","cn":"a4e67559-1cb5-43e3-bcf7-cb2b0c196bac"}}}`)),
 				},
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `{"identity":{"type":"System","system":{"cn":"a4e67559-1cb5-43e3-bcf7-cb2b0c196bac"}}}`,
+				body: `{"identity":{"org_id":"12345","system":{"cert_type":"consumer","cluster_id":"1","cn":"a4e67559-1cb5-43e3-bcf7-cb2b0c196bac"}}}`,
 			},
 		},
 		{
-			description: "good - associate",
+			description: "associate",
 			input: request{
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"type":"Associate","associate":{"Role":[],"email":"jsmith@redhat.com","givenName":"John","rhatUUID":"7ce854e8-606e-4d1a-9492-4660fcb4cfa4","surname":"Smith"}}}`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"associate":{"email":"jsmith@redhat.com","givenName":"John","rhatUUID":"f54b46b8-2c0d-4fbf-af21-f5cd877d715a","Role":["user"],"surname":"Smith"},"org_id":"12345"}}`)),
 				},
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `{"identity":{"type":"Associate","associate":{"Role":[],"email":"jsmith@redhat.com","givenName":"John","rhatUUID":"7ce854e8-606e-4d1a-9492-4660fcb4cfa4","surname":"Smith"}}}`,
+				body: `{"identity":{"associate":{"email":"jsmith@redhat.com","givenName":"John","rhatUUID":"f54b46b8-2c0d-4fbf-af21-f5cd877d715a","Role":["user"],"surname":"Smith"},"org_id":"12345"}}`,
 			},
 		},
 		{
-			description: "good - x509",
+			description: "x509",
 			input: request{
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"type":"X509","x509":{"subject_dn":"abc","issuer_dn":"def"}}}`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{"identity":{"org_id":"12345","x509":{"subject_dn":"O = 12345, CN = 2f1d5e64-67ea-40de-a190-83e86ffed03e","issuer_dn":"O = Red Hat"}}}`)),
 				},
 			},
 			want: response{
 				code: http.StatusOK,
-				body: `{"identity":{"type":"X509","x509":{"subject_dn":"abc","issuer_dn":"def"}}}`,
+				body: `{"identity":{"org_id":"12345","x509":{"subject_dn":"O = 12345, CN = 2f1d5e64-67ea-40de-a190-83e86ffed03e","issuer_dn":"O = Red Hat"}}}`,
 			},
 		},
 	}
@@ -159,13 +159,13 @@ func TestIdentify(t *testing.T) {
 			got := response{rr.Code, rr.Body.String()}
 
 			if !cmp.Equal(got, test.want, cmp.AllowUnexported(response{})) {
-				t.Errorf("\ngot: %#v\nwant: %#v", got, test.want)
+				t.Errorf("\n%v", cmp.Diff(got, test.want, cmp.AllowUnexported(response{})))
 			}
 		})
 	}
 }
 
-func TetGetIdentity(t *testing.T) {
+func TestGetIdentity(t *testing.T) {
 	tests := []struct {
 		description string
 		input       *http.Request
@@ -202,7 +202,7 @@ func TetGetIdentity(t *testing.T) {
 					t.Fatal(err)
 				}
 				if !cmp.Equal(got, test.want) {
-					t.Errorf("%v != %v", got, test.want)
+					t.Errorf("%v", cmp.Diff(got, test.want))
 				}
 			}
 		})
