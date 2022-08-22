@@ -13,6 +13,7 @@ import (
 
 	"github.com/peterbourgon/ff/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,7 +27,7 @@ func main() {
 		appname        string
 		dbDriver       string
 		dbHost         string
-		dbPort         string
+		dbPort         int
 		dbName         string
 		dbUser         string
 		dbPass         string
@@ -52,7 +53,7 @@ func main() {
 	fs.StringVar(&appname, "app-name", "", "name component for the API prefix")
 	fs.StringVar(&dbDriver, "db-driver", "sqlite3", "database driver ('pgx' or 'sqlite3')")
 	fs.StringVar(&dbHost, "db-host", "localhost", "IP or hostname of database server")
-	fs.StringVar(&dbPort, "db-port", "5432", "TCP port on database server")
+	fs.IntVar(&dbPort, "db-port", 5432, "TCP port on database server")
 	fs.StringVar(&dbName, "db-name", "postgres", "database name")
 	fs.StringVar(&dbUser, "db-user", "postgres", "database username")
 	fs.StringVar(&dbPass, "db-pass", "", "database user password")
@@ -68,7 +69,17 @@ func main() {
 		log.Fatalf("error: failed to parse flags: %v", err)
 	}
 
-	if dbURL == "" && (dbHost == "" || dbPort == "" || dbName == "" || dbUser == "") {
+	if clowder.IsClowderEnabled() {
+		dbHost = clowder.LoadedConfig.Database.Hostname
+		dbPort = clowder.LoadedConfig.Database.Port
+		dbName = clowder.LoadedConfig.Database.Name
+		dbUser = clowder.LoadedConfig.Database.Username
+		dbPass = clowder.LoadedConfig.Database.Password
+		addr = fmt.Sprintf(":%v", clowder.LoadedConfig.PublicPort)
+		maddr = fmt.Sprintf(":%v", clowder.LoadedConfig.MetricsPort)
+	}
+
+	if dbURL == "" && (dbHost == "" || dbPort == 0 || dbName == "" || dbUser == "") {
 		log.Fatal("error: unable to connect to database. See -help for details")
 	}
 
@@ -93,7 +104,7 @@ func main() {
 		if dbURL != "" {
 			connString = dbURL
 		} else {
-			connString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+			connString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
 				dbUser, dbPass, dbHost, dbPort, dbName)
 		}
 	case "sqlite3":
