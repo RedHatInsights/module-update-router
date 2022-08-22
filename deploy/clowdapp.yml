@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: module-update-router
+objects:
+  - apiVersion: cloud.redhat.com/v1alpha1
+    kind: ClowdApp
+    metadata:
+      name: module-update-router
+    spec:
+      testing:
+        iqePlugin: module-update-router
+      envName: ${ENV_NAME}
+      database:
+        name: module-update-router
+        version: 12
+      deployments:
+        - name: service
+          minReplicas: ${{MIN_REPLICAS}}
+          webServices:
+            public:
+              enabled: true
+          podSpec:
+            image: ${IMAGE}:${IMAGE_TAG}
+            env:
+              - name: PATH_PREFIX
+                value: ${PATH_PREFIX}
+              - name: APP_NAME
+                value: ${APP_NAME}
+              - name: DB_DRIVER
+                value: ${DB_DRIVER}
+              - name: METRICS_TOPIC
+                value: ${METRICS_TOPIC}
+            livenessProbe:
+              httpGet:
+                path: /ping
+                port: ${{WEB_PORT}}
+              initialDelaySeconds: 30
+            readinessProbe:
+              httpGet:
+                path: /ping
+                port: ${{WEB_PORT}}
+              initialDelaySeconds: 10
+            volumes:
+              - name: accounts-modules
+                secret:
+                  secretName: accounts-modules
+            volumeMounts:
+              - name: accounts-modules
+                mountPath: /seed
+            initContainers:
+              - name: migrate
+                image: ${IMAGE}:${IMAGE_TAG}
+                args:
+                  - "-migrate"
+                  - "-seed-path=/seed/seed.sql"
+                  - "-log-level=debug"
+                inheritEnv: true
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: accounts-modules
+    data:
+      seed.sql: QkVHSU47Q09NTUlUOwo=
+parameters:
+  - name: APP_NAME
+    value: module-update-router
+  - name: DB_DRIVER
+    value: pgx
+  - name: ENV_NAME
+    required: true
+  - name: IMAGE
+    value: quay.io/cloudservices/module-update-router
+    required: true
+  - name: IMAGE_TAG
+    required: true
+  - name: METRICS_TOPIC
+    value: platform.insights.client-metrics
+  - name: MIN_REPLICAS
+    value: "1"
+    required: true
+  - name: PATH_PREFIX
+    value: /api,/r/insights/platform
+  - name: WEB_PORT
+    value: "8000"
