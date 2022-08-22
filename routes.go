@@ -112,11 +112,11 @@ func (s *Server) handleChannel() http.HandlerFunc {
 			formatJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		if id.Identity.AccountNumber == nil {
-			formatJSONError(w, http.StatusBadRequest, "missing account_number identity field")
+		if id.Identity.OrgID == "" {
+			formatJSONError(w, http.StatusBadRequest, "missing org_id identity field")
 			return
 		}
-		count, err := s.db.Count(module, *id.Identity.AccountNumber)
+		count, err := s.db.Count(module, id.Identity.OrgID)
 		if err != nil {
 			log.Error(err)
 		}

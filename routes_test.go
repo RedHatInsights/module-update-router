@@ -32,42 +32,42 @@ func TestRouter(t *testing.T) {
 		},
 		{
 			desc:  "GET /channel - want /testing",
-			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/testing"}`},
 		},
 		{
 			desc:  "GET /channel - want /release",
-			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540156", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979711", "account_number": "540156", "type": "User", "internal": { "org_id": "1979711" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/release"}`},
 		},
 		{
 			desc:  "POST /event - want CREATED",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 1, "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 1, "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusCreated, ""},
 		},
 		{
 			desc:  "POST /event - want CREATED - exception is null",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 0, "exception": null, "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 0, "exception": null, "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusCreated, ""},
 		},
 		{
 			desc:  "POST /event - want CREATED - exception is omitted",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 0, "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": 0, "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusCreated, ""},
 		},
 		{
 			desc:  "POST /event - want CREATED - date format Z",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03Z", "exit": 0, "ended_at": "2020-06-19T11:19:03Z", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03Z", "exit": 0, "ended_at": "2020-06-19T11:19:03Z", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusCreated, ""},
 		},
 		{
 			desc:  "POST /event - want BAD REQUEST - exit is null",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": null, "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": null, "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusBadRequest, `{"errors":[{"status":"Bad Request","title":"missing required *int field: 'exit'"}]}`},
 		},
 		{
 			desc:  "POST /event - want BAD REQUEST - exit is omitted",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
+			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusBadRequest, `{"errors":[{"status":"Bad Request","title":"missing required *int field: 'exit'"}]}`},
 		},
 		{
@@ -77,7 +77,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event?limit=1",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -92,7 +92,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -107,7 +107,7 @@ func TestRouter(t *testing.T) {
 				url:    "/api/module-update-router/v1/event?offset=1&limit=1",
 				body:   ``,
 				headers: map[string]string{
-					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
+					"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "Associate", "internal": { "org_id": "1979710" } } }`)),
 				},
 			},
 			want: response{
@@ -128,7 +128,7 @@ func TestRouter(t *testing.T) {
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
-			if err := db.seedData([]byte(`INSERT INTO accounts_modules (account_id, module_name) VALUES ('540155', 'insights-core');`)); err != nil {
+			if err := db.seedData([]byte(`INSERT INTO orgs_modules (org_id, module_name) VALUES ('1979710', 'insights-core');`)); err != nil {
 				t.Fatal(err)
 			}
 			if err := db.seedData([]byte(`INSERT INTO events (event_id, phase, started_at, exit, exception, ended_at, machine_id, core_version, core_path)

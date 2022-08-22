@@ -61,31 +61,31 @@ func (db *DB) Close() error {
 	return db.handle.Close()
 }
 
-// Count returns the number of records found in the accounts_modules table with
-// the given module name and account ID.
-func (db *DB) Count(moduleName, accountID string) (int, error) {
-	stmt, err := db.preparedStatement(`SELECT COUNT(*) FROM accounts_modules WHERE module_name = $1 AND account_id = $2;`)
+// Count returns the number of records found in the orgs_modules table with the
+// given module name and org ID.
+func (db *DB) Count(moduleName, orgID string) (int, error) {
+	stmt, err := db.preparedStatement(`SELECT COUNT(*) FROM orgs_modules WHERE module_name = $1 AND org_id = $2;`)
 	if err != nil {
 		return -1, fmt.Errorf("db: db.preparedStatement failed: %w", err)
 	}
 
 	var count int
-	err = stmt.QueryRow(moduleName, accountID).Scan(&count)
+	err = stmt.QueryRow(moduleName, orgID).Scan(&count)
 	if err != nil {
 		return -1, fmt.Errorf("db: stmt.QueryRow failed: %w", err)
 	}
 	return count, nil
 }
 
-// InsertAccountsModules creates a new record in the accounts_modules table with
-// the given module name and account ID, creating their respective table records
-// if necessary.
-func (db *DB) InsertAccountsModules(moduleName, accountID string) error {
-	stmt, err := db.preparedStatement(`INSERT INTO accounts_modules (module_name, account_id) VALUES ($1, $2);`)
+// InsertOrgsModules creates a new record in the orgs_modules table with the
+// given module name and org ID, creating their respective table records if
+// necessary.
+func (db *DB) InsertOrgsModules(moduleName, orgID string) error {
+	stmt, err := db.preparedStatement(`INSERT INTO orgs_modules (module_name, org_id) VALUES ($1, $2);`)
 	if err != nil {
 		return fmt.Errorf("db: db.preparedStatement failed: %w", err)
 	}
-	_, err = stmt.Exec(moduleName, accountID)
+	_, err = stmt.Exec(moduleName, orgID)
 	if err != nil {
 		return fmt.Errorf("db: stmt.Exec failed: %w", err)
 	}
