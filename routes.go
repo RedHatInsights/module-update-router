@@ -101,7 +101,7 @@ func (s *Server) handleChannel() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		module := r.URL.Query().Get("module")
 		if len(module) < 1 {
-			formatJSONError(w, http.StatusBadRequest, "missing required paramenter: 'module'")
+			formatJSONError(w, http.StatusBadRequest, "missing required parameter: 'module'")
 			return
 		}
 
