@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/redhatinsights/module-update-router/identity"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/slok/go-http-metrics/metrics"
 	httpmetrics "github.com/slok/go-http-metrics/metrics/prometheus"
@@ -162,7 +161,7 @@ func (s *Server) handleEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			data, err := ioutil.ReadAll(r.Body)
+			data, err := io.ReadAll(r.Body)
 			if err != nil {
 				formatJSONError(w, http.StatusBadRequest, err.Error())
 				return
@@ -317,7 +316,7 @@ func (s *Server) log(next http.HandlerFunc) http.HandlerFunc {
 			responseBody = responseBody[:1024]
 		}
 
-		log.WithFields(logrus.Fields{
+		log.WithFields(log.Fields{
 			"ident":      r.Host,
 			"method":     r.Method,
 			"referer":    r.Referer(),

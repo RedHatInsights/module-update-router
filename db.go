@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -226,9 +226,9 @@ func (db *DB) Migrate(reset bool) error {
 
 // Seed executes the SQL contained in path in order to seed the database.
 func (db *DB) Seed(path string) error {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("db: ioutil.ReadFile failed: %w", err)
+		return fmt.Errorf("db: os.ReadFile failed: %w", err)
 	}
 	return db.seedData(data)
 }
