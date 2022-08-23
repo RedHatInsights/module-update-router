@@ -163,3 +163,9 @@ objects:
       DB_DRIVER: pgx
       KAFKA_BOOTSTRAP: "${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}"
       METRICS_TOPIC: platform.insights.client-metrics
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: accounts-modules
+    data:
+      seed.sql: QkVHSU47Q09NTUlUOwo=
