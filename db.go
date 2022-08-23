@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
 	"os"
 	"time"
@@ -10,13 +11,16 @@ import (
 	"github.com/golang-migrate/migrate/v4/database"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+//go:embed migrations
+var migrations embed.FS
 
 // DB wraps a sql.DB handle, providing an application-specific, higher-level API
 // around the standard sql.DB interface.
@@ -273,9 +277,14 @@ func newMigrate(db *sql.DB, driverName string) (*migrate.Migrate, error) {
 		}
 	}
 
-	m, err := migrate.NewWithDatabaseInstance("file://./migrations", driverName, driver)
+	source, err := iofs.New(migrations, "migrations")
 	if err != nil {
-		return nil, fmt.Errorf("db: migrate.NewithDatabaseInstance failed: %w", err)
+		return nil, err
+	}
+
+	m, err := migrate.NewWithInstance("iofs", source, driverName, driver)
+	if err != nil {
+		return nil, fmt.Errorf("db: migrate.NewithInstance failed: %w", err)
 	}
 
 	return m, nil
