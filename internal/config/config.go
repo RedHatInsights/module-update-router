@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
+	"github.com/sgreben/flagvar"
 )
 
 // Config stores values that are used to configure the application.
@@ -12,7 +13,7 @@ type Config struct {
 	Addr           string
 	APIVersion     string
 	AppName        string
-	DBDriver       string
+	DBDriver       flagvar.Enum
 	DBHost         string
 	DBName         string
 	DBPass         string
@@ -21,13 +22,13 @@ type Config struct {
 	DBUser         string
 	EventBuffer    int
 	KafkaBootstrap string
-	LogFormat      string
+	LogFormat      flagvar.Enum
 	LogLevel       string
 	MAddr          string
 	MetricsTopic   string
 	PathPrefix     string
 	Reset          bool
-	SeedPath       string
+	SeedPath       flagvar.File
 }
 
 // DefaultConfig is the default configuration variable, providing access to
@@ -36,7 +37,7 @@ var DefaultConfig Config = Config{
 	Addr:           ":8080",
 	APIVersion:     "v1",
 	AppName:        "module-update-router",
-	DBDriver:       "sqlite3",
+	DBDriver:       flagvar.Enum{Choices: []string{"pgx", "sqlite3"}, Value: "sqlite3"},
 	DBHost:         "localhost",
 	DBName:         "postgres",
 	DBPass:         "",
@@ -45,13 +46,13 @@ var DefaultConfig Config = Config{
 	DBUser:         "postgres",
 	EventBuffer:    1000,
 	KafkaBootstrap: "",
-	LogFormat:      "text",
+	LogFormat:      flagvar.Enum{Choices: []string{"text", "json"}, Value: "text"},
 	LogLevel:       "info",
 	MAddr:          ":2112",
 	MetricsTopic:   "client-metrics",
 	PathPrefix:     "/api",
 	Reset:          false,
-	SeedPath:       "",
+	SeedPath:       flagvar.File{},
 }
 
 // init can be used to set default values for DefaultConfig that require more
@@ -73,14 +74,14 @@ func init() {
 func FlagSet(name string, errorHandling flag.ErrorHandling) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, errorHandling)
 
-	fs.StringVar(&DefaultConfig.DBDriver, "db-driver", DefaultConfig.DBDriver, "database driver ('pgx' or 'sqlite3')")
+	fs.Var(&DefaultConfig.DBDriver, "db-driver", fmt.Sprintf("database driver (%v)", DefaultConfig.DBDriver.Help()))
 	fs.StringVar(&DefaultConfig.DBHost, "db-host", DefaultConfig.DBHost, "IP or hostname of database server")
 	fs.StringVar(&DefaultConfig.DBName, "db-name", DefaultConfig.DBName, "database name")
 	fs.StringVar(&DefaultConfig.DBPass, "db-pass", DefaultConfig.DBPass, "database user password")
 	fs.IntVar(&DefaultConfig.DBPort, "db-port", DefaultConfig.DBPort, "TCP port on database server")
 	fs.StringVar(&DefaultConfig.DBURL, "database-url", DefaultConfig.DBURL, "database connection URL")
 	fs.StringVar(&DefaultConfig.DBUser, "db-user", DefaultConfig.DBUser, "database username")
-	fs.StringVar(&DefaultConfig.LogFormat, "log-format", DefaultConfig.LogFormat, "set logging format (choice of 'json' or 'text')")
+	fs.Var(&DefaultConfig.LogFormat, "log-format", fmt.Sprintf("set logging format (%v)", DefaultConfig.LogFormat.Help()))
 	fs.StringVar(&DefaultConfig.LogLevel, "log-level", DefaultConfig.LogLevel, "logging level")
 
 	return fs

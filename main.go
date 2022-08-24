@@ -35,7 +35,7 @@ func main() {
 				FlagSet: func() *flag.FlagSet {
 					fs := flag.NewFlagSet("migrate", flag.ExitOnError)
 
-					fs.StringVar(&config.DefaultConfig.SeedPath, "seed-path", config.DefaultConfig.SeedPath, "path to the SQL seed file")
+					fs.Var(&config.DefaultConfig.SeedPath, "seed-path", "path to the SQL seed file")
 					fs.BoolVar(&config.DefaultConfig.Reset, "reset", config.DefaultConfig.Reset, "drop all tables before running migrations")
 
 					return fs
@@ -50,9 +50,9 @@ func main() {
 					}
 					log.Debug("migrations complete")
 
-					if config.DefaultConfig.SeedPath != "" {
+					if config.DefaultConfig.SeedPath.Value != "" {
 						log.Debug("seeding database")
-						if err := db.Seed(config.DefaultConfig.SeedPath); err != nil {
+						if err := db.Seed(config.DefaultConfig.SeedPath.Value); err != nil {
 							return err
 						}
 						log.Debug("seed complete")
@@ -158,7 +158,7 @@ func main() {
 		log.Fatalf("error: failed to parse flags: %v", err)
 	}
 
-	switch config.DefaultConfig.LogFormat {
+	switch config.DefaultConfig.LogFormat.Value {
 	case "json":
 		log.SetFormatter(&log.JSONFormatter{})
 	default:
@@ -175,7 +175,7 @@ func main() {
 	log.Debugf("%+v", config.DefaultConfig)
 
 	var connString string
-	switch config.DefaultConfig.DBDriver {
+	switch config.DefaultConfig.DBDriver.Value {
 	case "pgx":
 		if config.DefaultConfig.DBURL != "" {
 			connString = config.DefaultConfig.DBURL
@@ -193,7 +193,7 @@ func main() {
 		log.Fatalf("error: unsupported database: %v", config.DefaultConfig.DBDriver)
 	}
 
-	db, err = Open(config.DefaultConfig.DBDriver, connString)
+	db, err = Open(config.DefaultConfig.DBDriver.Value, connString)
 	if err != nil {
 		log.Fatal(err)
 	}
