@@ -37,6 +37,7 @@ var DefaultConfig Config = Config{
 	AppName:        "",
 	DBDriver:       "sqlite3",
 	DBHost:         "localhost",
+	DBName:         "postgres",
 	DBPass:         "",
 	DBPort:         5432,
 	DBURL:          "",
