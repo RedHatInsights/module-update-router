@@ -22,6 +22,8 @@ objects:
               enabled: true
           podSpec:
             image: ${IMAGE}:${IMAGE_TAG}
+            args:
+              - "http-api"
             env:
               - name: APP_NAME
                 value: ${APP_NAME}
@@ -56,9 +58,8 @@ objects:
               - name: migrate
                 image: ${IMAGE}:${IMAGE_TAG}
                 args:
-                  - "-migrate"
+                  - "migrate"
                   - "-seed-path=/seed/seed.sql"
-                  - "-log-level=debug"
                 inheritEnv: true
   - apiVersion: v1
     kind: Secret
