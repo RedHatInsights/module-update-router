@@ -35,7 +35,7 @@ type Config struct {
 var DefaultConfig Config = Config{
 	Addr:           ":8080",
 	APIVersion:     "v1",
-	AppName:        "",
+	AppName:        "module-update-router",
 	DBDriver:       "sqlite3",
 	DBHost:         "localhost",
 	DBName:         "postgres",
