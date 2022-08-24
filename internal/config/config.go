@@ -10,6 +10,7 @@ import (
 // Config stores values that are used to configure the application.
 type Config struct {
 	Addr           string
+	APIVersion     string
 	AppName        string
 	DBDriver       string
 	DBHost         string
@@ -34,6 +35,7 @@ type Config struct {
 // configuration values globally.
 var DefaultConfig Config = Config{
 	Addr:           ":8080",
+	APIVersion:     "v1",
 	AppName:        "",
 	DBDriver:       "sqlite3",
 	DBHost:         "localhost",
@@ -74,6 +76,7 @@ func FlagSet(name string, errorHandling flag.ErrorHandling) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, errorHandling)
 
 	fs.StringVar(&DefaultConfig.Addr, "addr", DefaultConfig.Addr, "app listen address")
+	fs.StringVar(&DefaultConfig.APIVersion, "api-version", DefaultConfig.APIVersion, "version to use in the URL path")
 	fs.StringVar(&DefaultConfig.MAddr, "maddr", DefaultConfig.MAddr, "metrics listen address")
 	fs.StringVar(&DefaultConfig.LogLevel, "log-level", DefaultConfig.LogLevel, "logging level")
 	fs.StringVar(&DefaultConfig.LogFormat, "log-format", DefaultConfig.LogFormat, "set logging format (choice of 'json' or 'text')")
