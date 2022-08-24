@@ -25,7 +25,6 @@ type Config struct {
 	LogLevel       string
 	MAddr          string
 	MetricsTopic   string
-	Migrate        bool
 	PathPrefix     string
 	Reset          bool
 	SeedPath       string
@@ -50,7 +49,6 @@ var DefaultConfig Config = Config{
 	LogLevel:       "info",
 	MAddr:          ":2112",
 	MetricsTopic:   "client-metrics",
-	Migrate:        false,
 	PathPrefix:     "/api",
 	Reset:          false,
 	SeedPath:       "",
@@ -75,26 +73,15 @@ func init() {
 func FlagSet(name string, errorHandling flag.ErrorHandling) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, errorHandling)
 
-	fs.StringVar(&DefaultConfig.Addr, "addr", DefaultConfig.Addr, "app listen address")
-	fs.StringVar(&DefaultConfig.APIVersion, "api-version", DefaultConfig.APIVersion, "version to use in the URL path")
-	fs.StringVar(&DefaultConfig.MAddr, "maddr", DefaultConfig.MAddr, "metrics listen address")
-	fs.StringVar(&DefaultConfig.LogLevel, "log-level", DefaultConfig.LogLevel, "logging level")
-	fs.StringVar(&DefaultConfig.LogFormat, "log-format", DefaultConfig.LogFormat, "set logging format (choice of 'json' or 'text')")
-	fs.StringVar(&DefaultConfig.PathPrefix, "path-prefix", DefaultConfig.PathPrefix, "API path prefix")
-	fs.StringVar(&DefaultConfig.AppName, "app-name", DefaultConfig.AppName, "name component for the API prefix")
 	fs.StringVar(&DefaultConfig.DBDriver, "db-driver", DefaultConfig.DBDriver, "database driver ('pgx' or 'sqlite3')")
 	fs.StringVar(&DefaultConfig.DBHost, "db-host", DefaultConfig.DBHost, "IP or hostname of database server")
-	fs.IntVar(&DefaultConfig.DBPort, "db-port", DefaultConfig.DBPort, "TCP port on database server")
 	fs.StringVar(&DefaultConfig.DBName, "db-name", DefaultConfig.DBName, "database name")
-	fs.StringVar(&DefaultConfig.DBUser, "db-user", DefaultConfig.DBUser, "database username")
 	fs.StringVar(&DefaultConfig.DBPass, "db-pass", DefaultConfig.DBPass, "database user password")
-	fs.StringVar(&DefaultConfig.DBUser, "database-url", DefaultConfig.DBURL, "database connection URL")
-	fs.StringVar(&DefaultConfig.MetricsTopic, "metrics-topic", DefaultConfig.MetricsTopic, "topic on which to place metrics data")
-	fs.StringVar(&DefaultConfig.KafkaBootstrap, "kafka-bootstrap", DefaultConfig.KafkaBootstrap, "url of the kafka broker for the cluster")
-	fs.IntVar(&DefaultConfig.EventBuffer, "event-buffer", DefaultConfig.EventBuffer, "the size of the event channel buffer")
-	fs.BoolVar(&DefaultConfig.Migrate, "migrate", DefaultConfig.Migrate, "run migrations")
-	fs.StringVar(&DefaultConfig.SeedPath, "seed-path", DefaultConfig.SeedPath, "path to the SQL seed file")
-	fs.BoolVar(&DefaultConfig.Reset, "reset", DefaultConfig.Reset, "drop all tables before running migrations")
+	fs.IntVar(&DefaultConfig.DBPort, "db-port", DefaultConfig.DBPort, "TCP port on database server")
+	fs.StringVar(&DefaultConfig.DBURL, "database-url", DefaultConfig.DBURL, "database connection URL")
+	fs.StringVar(&DefaultConfig.DBUser, "db-user", DefaultConfig.DBUser, "database username")
+	fs.StringVar(&DefaultConfig.LogFormat, "log-format", DefaultConfig.LogFormat, "set logging format (choice of 'json' or 'text')")
+	fs.StringVar(&DefaultConfig.LogLevel, "log-level", DefaultConfig.LogLevel, "logging level")
 
 	return fs
 }
