@@ -27,7 +27,6 @@ func main() {
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
 		log.Fatalf("error: failed to parse flags: %v", err)
 	}
-	log.Debug(config.DefaultConfig)
 
 	if config.DefaultConfig.DBURL == "" && (config.DefaultConfig.DBHost == "" || config.DefaultConfig.DBPort == 0 || config.DefaultConfig.DBName == "" || config.DefaultConfig.DBUser == "") {
 		log.Fatal("error: unable to connect to database. See -help for details")
@@ -48,6 +47,7 @@ func main() {
 
 	log.SetReportCaller(true)
 
+	log.Debugf("%+v", config.DefaultConfig)
 	var connString string
 	switch config.DefaultConfig.DBDriver {
 	case "pgx":
