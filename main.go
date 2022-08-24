@@ -18,10 +18,6 @@ import (
 )
 
 func main() {
-	const (
-		apiversion = "v1"
-	)
-
 	fs := config.FlagSet(os.Args[0], flag.ExitOnError)
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
@@ -92,7 +88,7 @@ func main() {
 
 	apiroots := strings.Split(config.DefaultConfig.PathPrefix, ",")
 	for i, root := range apiroots {
-		apiroots[i] = path.Join(root, config.DefaultConfig.AppName, apiversion)
+		apiroots[i] = path.Join(root, config.DefaultConfig.AppName, config.DefaultConfig.APIVersion)
 	}
 
 	var events *chan []byte
