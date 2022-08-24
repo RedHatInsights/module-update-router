@@ -13,85 +13,34 @@ import (
 
 	"github.com/peterbourgon/ff/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
+	"github.com/redhatinsights/module-update-router/internal/config"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	var (
-		addr           string
-		maddr          string
-		logLevel       string
-		logFormat      string
-		pathprefix     string
-		appname        string
-		dbDriver       string
-		dbHost         string
-		dbPort         int
-		dbName         string
-		dbUser         string
-		dbPass         string
-		dbURL          string
-		metricsTopic   string
-		kafkaBootstrap string
-		eventBuffer    int
-		migrate        bool
-		seedpath       string
-		reset          bool
-	)
-
 	const (
 		apiversion = "v1"
 	)
 
-	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	fs.StringVar(&addr, "addr", ":8080", "app listen address")
-	fs.StringVar(&maddr, "maddr", ":2112", "metrics listen address")
-	fs.StringVar(&logLevel, "log-level", "info", "logging level")
-	fs.StringVar(&logFormat, "log-format", "text", "set logging format (choice of 'json' or 'text')")
-	fs.StringVar(&pathprefix, "path-prefix", "/api", "API path prefix")
-	fs.StringVar(&appname, "app-name", "", "name component for the API prefix")
-	fs.StringVar(&dbDriver, "db-driver", "sqlite3", "database driver ('pgx' or 'sqlite3')")
-	fs.StringVar(&dbHost, "db-host", "localhost", "IP or hostname of database server")
-	fs.IntVar(&dbPort, "db-port", 5432, "TCP port on database server")
-	fs.StringVar(&dbName, "db-name", "postgres", "database name")
-	fs.StringVar(&dbUser, "db-user", "postgres", "database username")
-	fs.StringVar(&dbPass, "db-pass", "", "database user password")
-	fs.StringVar(&dbURL, "database-url", "", "database connection URL")
-	fs.StringVar(&metricsTopic, "metrics-topic", "client-metrics", "topic on which to place metrics data")
-	fs.StringVar(&kafkaBootstrap, "kafka-bootstrap", "", "url of the kafka broker for the cluster")
-	fs.IntVar(&eventBuffer, "event-buffer", 1000, "the size of the event channel buffer")
-	fs.BoolVar(&migrate, "migrate", false, "run migrations")
-	fs.StringVar(&seedpath, "seed-path", "", "path to the SQL seed file")
-	fs.BoolVar(&reset, "reset", false, "drop all tables before running migrations")
+	fs := config.FlagSet(os.Args[0], flag.ExitOnError)
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
 		log.Fatalf("error: failed to parse flags: %v", err)
 	}
+	log.Debug(config.DefaultConfig)
 
-	if clowder.IsClowderEnabled() {
-		log.Debug(clowder.LoadedConfig)
-		dbHost = clowder.LoadedConfig.Database.Hostname
-		dbPort = clowder.LoadedConfig.Database.Port
-		dbName = clowder.LoadedConfig.Database.Name
-		dbUser = clowder.LoadedConfig.Database.Username
-		dbPass = clowder.LoadedConfig.Database.Password
-		addr = fmt.Sprintf(":%v", *clowder.LoadedConfig.PublicPort)
-		maddr = fmt.Sprintf(":%v", clowder.LoadedConfig.MetricsPort)
-	}
-
-	if dbURL == "" && (dbHost == "" || dbPort == 0 || dbName == "" || dbUser == "") {
+	if config.DefaultConfig.DBURL == "" && (config.DefaultConfig.DBHost == "" || config.DefaultConfig.DBPort == 0 || config.DefaultConfig.DBName == "" || config.DefaultConfig.DBUser == "") {
 		log.Fatal("error: unable to connect to database. See -help for details")
 	}
 
-	switch logFormat {
+	switch config.DefaultConfig.LogFormat {
 	case "json":
 		log.SetFormatter(&log.JSONFormatter{})
 	default:
 		log.SetFormatter(&log.TextFormatter{})
 	}
 
-	lvl, err := log.ParseLevel(logLevel)
+	lvl, err := log.ParseLevel(config.DefaultConfig.LogLevel)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,40 +49,40 @@ func main() {
 	log.SetReportCaller(true)
 
 	var connString string
-	switch dbDriver {
+	switch config.DefaultConfig.DBDriver {
 	case "pgx":
-		if dbURL != "" {
-			connString = dbURL
+		if config.DefaultConfig.DBURL != "" {
+			connString = config.DefaultConfig.DBURL
 		} else {
 			connString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
-				dbUser, dbPass, dbHost, dbPort, dbName)
+				config.DefaultConfig.DBUser, config.DefaultConfig.DBPass, config.DefaultConfig.DBHost, config.DefaultConfig.DBPort, config.DefaultConfig.DBName)
 		}
 	case "sqlite3":
-		if dbURL != "" {
-			connString = dbURL
+		if config.DefaultConfig.DBURL != "" {
+			connString = config.DefaultConfig.DBURL
 		} else {
 			connString = "file::memory:?cache=shared"
 		}
 	default:
-		log.Fatalf("error: unsupported database: %v", dbDriver)
+		log.Fatalf("error: unsupported database: %v", config.DefaultConfig.DBDriver)
 	}
 
-	db, err := Open(dbDriver, connString)
+	db, err := Open(config.DefaultConfig.DBDriver, connString)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	if migrate {
+	if config.DefaultConfig.Migrate {
 		log.Debug("running migrations")
-		if err := db.Migrate(reset); err != nil {
+		if err := db.Migrate(config.DefaultConfig.Reset); err != nil {
 			log.Fatal(err)
 		}
 		log.Debug("migrations complete")
 
-		if seedpath != "" {
+		if config.DefaultConfig.SeedPath != "" {
 			log.Debug("seeding database")
-			if err := db.Seed(seedpath); err != nil {
+			if err := db.Seed(config.DefaultConfig.SeedPath); err != nil {
 				log.Fatal(err)
 			}
 			log.Debug("seed complete")
@@ -141,23 +90,23 @@ func main() {
 		os.Exit(0)
 	}
 
-	apiroots := strings.Split(pathprefix, ",")
+	apiroots := strings.Split(config.DefaultConfig.PathPrefix, ",")
 	for i, root := range apiroots {
-		apiroots[i] = path.Join(root, appname, apiversion)
+		apiroots[i] = path.Join(root, config.DefaultConfig.AppName, apiversion)
 	}
 
 	var events *chan []byte
-	if kafkaBootstrap != "" {
-		c := make(chan []byte, eventBuffer)
+	if config.DefaultConfig.KafkaBootstrap != "" {
+		c := make(chan []byte, config.DefaultConfig.EventBuffer)
 		events = &c
-		ProduceMessages(kafkaBootstrap, metricsTopic, true, events)
+		ProduceMessages(config.DefaultConfig.KafkaBootstrap, config.DefaultConfig.MetricsTopic, true, events)
 		log.WithFields(log.Fields{
-			"broker": kafkaBootstrap,
-			"topic":  metricsTopic,
+			"broker": config.DefaultConfig.KafkaBootstrap,
+			"topic":  config.DefaultConfig.MetricsTopic,
 		}).Info("started kafka producer")
 	}
 
-	srv, err := NewServer(addr, apiroots, db, events)
+	srv, err := NewServer(config.DefaultConfig.Addr, apiroots, db, events)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -186,17 +135,17 @@ func main() {
 	go func() {
 		log.WithFields(log.Fields{
 			"routine": "metrics",
-			"addr":    maddr,
+			"addr":    config.DefaultConfig.MAddr,
 		}).Info("started http listener")
-		if err := http.ListenAndServe(maddr, promhttp.Handler()); err != nil {
-			log.Fatalf("error: failed to listen to addr (%v): %v", maddr, err)
+		if err := http.ListenAndServe(config.DefaultConfig.MAddr, promhttp.Handler()); err != nil {
+			log.Fatalf("error: failed to listen to addr (%v): %v", config.DefaultConfig.MAddr, err)
 		}
 	}()
 
 	go func() {
 		log.WithFields(log.Fields{
 			"routine": "app",
-			"addr":    addr,
+			"addr":    config.DefaultConfig.Addr,
 		}).Info("started http listener")
 		log.Fatal(srv.ListenAndServe())
 	}()
