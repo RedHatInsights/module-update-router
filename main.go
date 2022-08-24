@@ -70,6 +70,7 @@ func main() {
 	}
 
 	if clowder.IsClowderEnabled() {
+		log.Debug(clowder.LoadedConfig)
 		dbHost = clowder.LoadedConfig.Database.Hostname
 		dbPort = clowder.LoadedConfig.Database.Port
 		dbName = clowder.LoadedConfig.Database.Name
