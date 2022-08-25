@@ -89,6 +89,6 @@ parameters:
     value: "1"
     required: true
   - name: PATH_PREFIX
-    value: /api,/r/insights/platform
+    value: "/api,/r/insights/platform"
   - name: WEB_PORT
     value: "8000"
