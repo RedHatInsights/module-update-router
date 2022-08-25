@@ -36,7 +36,7 @@ objects:
               - name: METRICS_TOPIC
                 value: ${METRICS_TOPIC}
               - name: PATH_PREFIX
-                value: ${PATH_PREFIX}
+                value: ${{PATH_PREFIX}}
             livenessProbe:
               httpGet:
                 path: /ping
