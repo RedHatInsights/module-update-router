@@ -1,10 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -138,96 +136,9 @@ func (s *Server) handleChannel() http.HandlerFunc {
 
 // handleEvent creates an http.HandlerFunc for the API endpoint /event.
 func (s *Server) handleEvent() http.HandlerFunc {
-	type requestBody struct {
-		Phase       *string    `json:"phase"`
-		StartedAt   *time.Time `json:"started_at"`
-		Exit        *int       `json:"exit"`
-		Exception   *string    `json:"exception"`
-		EndedAt     *time.Time `json:"ended_at"`
-		MachineID   *string    `json:"machine_id"`
-		CoreVersion *string    `json:"core_version"`
-		CorePath    *string    `json:"core_path"`
-	}
-	type event struct {
-		Phase       string
-		StartedAt   time.Time
-		Exit        int
-		Exception   sql.NullString
-		EndedAt     time.Time
-		MachineID   string
-		CoreVersion string
-		CorePath    string
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			data, err := io.ReadAll(r.Body)
-			if err != nil {
-				formatJSONError(w, http.StatusBadRequest, err.Error())
-				return
-			}
-			defer r.Body.Close()
-
-			var body requestBody
-			if err := json.Unmarshal(data, &body); err != nil {
-				formatJSONError(w, http.StatusBadRequest, err.Error())
-				return
-			}
-
-			// Check required fields for presence of a value. Each struct member of
-			// body is compared to the nil value, and an error is returned if a value
-			// is found to be nil.
-			for p, v := range map[string]interface{}{
-				"phase":        body.Phase,
-				"started_at":   body.StartedAt,
-				"exit":         body.Exit,
-				"ended_at":     body.EndedAt,
-				"machine_id":   body.MachineID,
-				"core_version": body.CoreVersion,
-				"core_path":    body.CorePath,
-			} {
-				switch t := v.(type) {
-				case *string:
-					if v.(*string) == nil {
-						formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required %T field: '%v'`, t, p))
-						return
-					}
-				case *int:
-					if v.(*int) == nil {
-						formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required %T field: '%v'`, t, p))
-						return
-					}
-				case *time.Time:
-					if v.(*time.Time) == nil {
-						formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`missing required %T field: '%v'`, t, p))
-						return
-					}
-				default:
-					formatJSONError(w, http.StatusBadRequest, fmt.Sprintf(`unsupported type: '%T'`, t))
-					return
-				}
-			}
-
-			e := event{
-				Phase:       *body.Phase,
-				StartedAt:   *body.StartedAt,
-				Exit:        *body.Exit,
-				Exception:   NewNullString(body.Exception),
-				EndedAt:     *body.EndedAt,
-				MachineID:   *body.MachineID,
-				CoreVersion: *body.CoreVersion,
-				CorePath:    *body.CorePath,
-			}
-
-			if err := s.db.InsertEvents(e.Phase, e.StartedAt, e.Exit, e.Exception, e.EndedAt, e.MachineID, e.CoreVersion, e.CorePath); err != nil {
-				formatJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-			if s.events != nil {
-				*s.events <- data
-			}
-			incEvents(e.CoreVersion)
-			observeClientElapsed(e.Phase, e.StartedAt, e.EndedAt)
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
 			id, err := identity.GetIdentity(r)
