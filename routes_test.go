@@ -61,16 +61,6 @@ func TestRouter(t *testing.T) {
 			want:  response{http.StatusCreated, ""},
 		},
 		{
-			desc:  "POST /event - want BAD REQUEST - exit is null",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exit": null, "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
-			want:  response{http.StatusBadRequest, `{"errors":[{"status":"Bad Request","title":"missing required *int field: 'exit'"}]}`},
-		},
-		{
-			desc:  "POST /event - want BAD REQUEST - exit is omitted",
-			input: request{http.MethodPost, "/api/module-update-router/v1/event", `{"phase": "pre_update", "started_at": "2020-06-19T11:18:03-04:00", "exception": "OSPermissionError", "ended_at": "2020-06-19T11:19:03-04:00", "machine_id": "60654767-dfba-47af-8bca-cb2d1d01d9a6", "core_version": "3.0.156", "core_path": "/etc/rpm/insights.egg"}`, map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
-			want:  response{http.StatusBadRequest, `{"errors":[{"status":"Bad Request","title":"missing required *int field: 'exit'"}]}`},
-		},
-		{
 			desc: "GET /event - limit 1",
 			input: request{
 				method: http.MethodGet,
