@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/peterbourgon/ff/v3 v3.0.0
 	github.com/prometheus/client_golang v1.11.0
-	github.com/redhatinsights/app-common-go v1.6.3
+	github.com/redhatinsights/app-common-go v1.6.7
 	github.com/redhatinsights/platform-go-middlewares v0.10.0
 	github.com/segmentio/kafka-go v0.3.7
 	github.com/sgreben/flagvar v1.10.1
