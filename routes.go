@@ -15,6 +15,7 @@ import (
 	"github.com/slok/go-http-metrics/metrics"
 	httpmetrics "github.com/slok/go-http-metrics/metrics/prometheus"
 	"github.com/slok/go-http-metrics/middleware"
+	"github.com/slok/go-http-metrics/middleware/std"
 
 	request "github.com/redhatinsights/platform-go-middlewares/request_id"
 )
@@ -264,6 +265,6 @@ func (s *Server) metrics(next http.HandlerFunc) http.HandlerFunc {
 		Recorder: r,
 	})
 	return func(w http.ResponseWriter, r *http.Request) {
-		m.Handler("", http.Handler(next)).ServeHTTP(w, r)
+		std.Handler("", m, http.Handler(next)).ServeHTTP(w, r)
 	}
 }
