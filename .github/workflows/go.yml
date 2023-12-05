@@ -1,8 +1,8 @@
 name: Go
 
 on:
-  push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ['1.16']
+        go: ['1.20']
     steps:
       - name: Updating ...
         run: sudo apt-get -qq update
@@ -29,4 +29,4 @@ jobs:
         run: go test -v ./...
 
       - name: Go vet
-        run: go get -v ./...
+        run: go vet -v ./...
