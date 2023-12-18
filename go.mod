@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redhatinsights/app-common-go v1.6.7
 	github.com/redhatinsights/platform-go-middlewares v0.20.0
-	github.com/segmentio/kafka-go v0.4.46
+	github.com/segmentio/kafka-go v0.4.47
 	github.com/sgreben/flagvar v1.10.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slok/go-http-metrics v0.11.0
