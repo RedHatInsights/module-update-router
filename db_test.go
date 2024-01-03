@@ -25,7 +25,7 @@ func TestDBCount(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
-			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			db, err := Open("sqlite", "file::memory:?cache=shared")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -94,7 +94,7 @@ func TestDBInsertEvents(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
-			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			db, err := Open("sqlite", "file::memory:?cache=shared")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -209,7 +209,7 @@ func TestDBGetEvents(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
-			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			db, err := Open("sqlite", "file::memory:?cache=shared")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -291,7 +291,7 @@ func TestDeleteEvents(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
-			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			db, err := Open("sqlite", "file::memory:?cache=shared")
 			if err != nil {
 				t.Fatal(err)
 			}

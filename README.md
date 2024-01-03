@@ -30,8 +30,8 @@ Configuration is done through environment variables.
 * `MADDR`: Address on which the metrics HTTP server should listen (default:
    ":2112")
 * `LOG_FORMAT`: Format of log output (either "json" or "text") (default: "text")
-* `DB_DRIVER`: Database driver to use (either "pgx" or "sqlite3")
-   (default: "sqlite3")
+* `DB_DRIVER`: Database driver to use (either "pgx" or "sqlite")
+   (default: "sqlite")
 * `DATABASE_URL`: A URL forming a database connection string (i.e. "file::memory:")
 * `DB_HOST`: Address of the database server (default: "localhost")
 * `DB_PORT`: TCP port of the database server (default: "5432")

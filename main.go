@@ -171,7 +171,7 @@ func main() {
 			connString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
 				config.DefaultConfig.DBUser, config.DefaultConfig.DBPass, config.DefaultConfig.DBHost, config.DefaultConfig.DBPort, config.DefaultConfig.DBName)
 		}
-	case "sqlite3":
+	case "sqlite":
 		if config.DefaultConfig.DBURL != "" {
 			connString = config.DefaultConfig.DBURL
 		} else {

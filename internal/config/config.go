@@ -36,7 +36,7 @@ var DefaultConfig Config = Config{
 	Addr:         ":8080",
 	APIVersion:   "v1",
 	AppName:      "module-update-router",
-	DBDriver:     flagvar.Enum{Choices: []string{"pgx", "sqlite3"}, Value: "sqlite3"},
+	DBDriver:     flagvar.Enum{Choices: []string{"pgx", ""}, Value: "sqlite"},
 	DBHost:       "localhost",
 	DBName:       "postgres",
 	DBPass:       "",

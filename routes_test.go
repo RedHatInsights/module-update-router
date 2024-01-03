@@ -110,7 +110,7 @@ func TestRouter(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
 			// Bootstrap a server and seed the database
-			db, err := Open("sqlite3", "file::memory:?cache=shared")
+			db, err := Open("sqlite", "file::memory:?cache=shared")
 			if err != nil {
 				t.Fatal(err)
 			}
