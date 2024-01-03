@@ -73,7 +73,6 @@ func main() {
 					fs.StringVar(&config.DefaultConfig.APIVersion, "api-version", config.DefaultConfig.APIVersion, "version to use in the URL path")
 					fs.StringVar(&config.DefaultConfig.AppName, "app-name", config.DefaultConfig.AppName, "name component for the API prefix")
 					fs.IntVar(&config.DefaultConfig.EventBuffer, "event-buffer", config.DefaultConfig.EventBuffer, "the size of the event channel buffer")
-					fs.StringVar(&config.DefaultConfig.KafkaBootstrap, "kafka-bootstrap", config.DefaultConfig.KafkaBootstrap, "url of the kafka broker for the cluster")
 					fs.StringVar(&config.DefaultConfig.MAddr, "maddr", config.DefaultConfig.MAddr, "metrics listen address")
 					fs.StringVar(&config.DefaultConfig.MetricsTopic, "metrics-topic", config.DefaultConfig.MetricsTopic, "topic on which to place metrics data")
 					fs.StringVar(&config.DefaultConfig.PathPrefix, "path-prefix", config.DefaultConfig.PathPrefix, "API path prefix")
@@ -86,18 +85,7 @@ func main() {
 						apiroots[i] = path.Join(root, config.DefaultConfig.AppName, config.DefaultConfig.APIVersion)
 					}
 
-					var events *chan []byte
-					if config.DefaultConfig.KafkaBootstrap != "" {
-						c := make(chan []byte, config.DefaultConfig.EventBuffer)
-						events = &c
-						ProduceMessages(config.DefaultConfig.KafkaBootstrap, config.DefaultConfig.MetricsTopic, true, events)
-						log.WithFields(log.Fields{
-							"broker": config.DefaultConfig.KafkaBootstrap,
-							"topic":  config.DefaultConfig.MetricsTopic,
-						}).Info("started kafka producer")
-					}
-
-					srv, err := NewServer(config.DefaultConfig.Addr, apiroots, db, events)
+					srv, err := NewServer(config.DefaultConfig.Addr, apiroots, db)
 					if err != nil {
 						log.Fatal(err)
 					}

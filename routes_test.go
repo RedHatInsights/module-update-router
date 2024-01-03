@@ -130,7 +130,7 @@ func TestRouter(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			srv, err := NewServer(":8080", []string{"/api/module-update-router/v1"}, db, nil)
+			srv, err := NewServer(":8080", []string{"/api/module-update-router/v1"}, db)
 			if err != nil {
 				t.Fatal(err)
 			}
