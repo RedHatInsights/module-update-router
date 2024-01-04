@@ -22,8 +22,6 @@ objects:
               enabled: true
           podSpec:
             image: ${IMAGE}:${IMAGE_TAG}
-            args:
-              - "http-api"
             env:
               - name: APP_NAME
                 value: ${APP_NAME}
@@ -37,6 +35,8 @@ objects:
                 value: ${METRICS_TOPIC}
               - name: PATH_PREFIX
                 value: ${{PATH_PREFIX}}
+              - name: SEED_PATH
+                value: ${SEED_PATH}
             livenessProbe:
               httpGet:
                 path: /ping
@@ -54,13 +54,6 @@ objects:
             volumeMounts:
               - name: accounts-modules
                 mountPath: /seed
-            initContainers:
-              - name: migrate
-                image: ${IMAGE}:${IMAGE_TAG}
-                args:
-                  - "migrate"
-                  - "-seed-path=/seed/seed.sql"
-                inheritEnv: true
   - apiVersion: v1
     kind: Secret
     metadata:
@@ -92,3 +85,5 @@ parameters:
     value: "/api,/r/insights/platform"
   - name: WEB_PORT
     value: "8000"
+  - name: SEED_PATH
+    value: "/seed/seed.sql"

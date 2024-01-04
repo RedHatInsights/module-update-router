@@ -81,6 +81,15 @@ func FlagSet(name string, errorHandling flag.ErrorHandling) *flag.FlagSet {
 	fs.StringVar(&DefaultConfig.DBUser, "db-user", DefaultConfig.DBUser, "database username")
 	fs.Var(&DefaultConfig.LogFormat, "log-format", fmt.Sprintf("set logging format (%v)", DefaultConfig.LogFormat.Help()))
 	fs.StringVar(&DefaultConfig.LogLevel, "log-level", DefaultConfig.LogLevel, "logging level")
+	fs.Var(&DefaultConfig.SeedPath, "seed-path", "path to the SQL seed file")
+	fs.BoolVar(&DefaultConfig.Reset, "reset", DefaultConfig.Reset, "drop all tables before running migrations")
+	fs.StringVar(&DefaultConfig.Addr, "addr", DefaultConfig.Addr, "app listen address")
+	fs.StringVar(&DefaultConfig.APIVersion, "api-version", DefaultConfig.APIVersion, "version to use in the URL path")
+	fs.StringVar(&DefaultConfig.AppName, "app-name", DefaultConfig.AppName, "name component for the API prefix")
+	fs.IntVar(&DefaultConfig.EventBuffer, "event-buffer", DefaultConfig.EventBuffer, "the size of the event channel buffer")
+	fs.StringVar(&DefaultConfig.MAddr, "maddr", DefaultConfig.MAddr, "metrics listen address")
+	fs.StringVar(&DefaultConfig.MetricsTopic, "metrics-topic", DefaultConfig.MetricsTopic, "topic on which to place metrics data")
+	fs.StringVar(&DefaultConfig.PathPrefix, "path-prefix", DefaultConfig.PathPrefix, "API path prefix")
 
 	return fs
 }
