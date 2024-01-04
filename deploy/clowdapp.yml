@@ -25,8 +25,6 @@ objects:
             env:
               - name: APP_NAME
                 value: ${APP_NAME}
-              - name: DB_DRIVER
-                value: ${DB_DRIVER}
               - name: LOG_FORMAT
                 value: ${LOG_FORMAT}
               - name: LOG_LEVEL
@@ -63,8 +61,6 @@ objects:
 parameters:
   - name: APP_NAME
     value: module-update-router
-  - name: DB_DRIVER
-    value: pgx
   - name: ENV_NAME
     required: true
   - name: IMAGE
