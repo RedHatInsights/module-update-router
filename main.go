@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/peterbourgon/ff/v3"
 	"github.com/peterbourgon/ff/v3/ffcli"
@@ -74,26 +73,6 @@ func main() {
 				log.Fatal(err)
 			}
 			defer srv.Close()
-
-			go func() {
-				log.WithFields(log.Fields{
-					"routine": "db_trim",
-				}).Info("started database trimmer")
-				for {
-					rows, err := db.DeleteEvents(time.Now().UTC().Add(-30 * 24 * time.Hour))
-					if err != nil {
-						log.WithFields(log.Fields{
-							"routine": "db_trim",
-							"error":   err,
-						}).Error("deleting events")
-					}
-					log.WithFields(log.Fields{
-						"routine": "db_trim",
-						"rows":    rows,
-					}).Info("deleted rows")
-					time.Sleep(1 * time.Hour)
-				}
-			}()
 
 			go func() {
 				log.WithFields(log.Fields{
