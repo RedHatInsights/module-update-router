@@ -55,11 +55,7 @@ func main() {
 						config.DefaultConfig.DBUser, config.DefaultConfig.DBPass, config.DefaultConfig.DBHost, config.DefaultConfig.DBPort, config.DefaultConfig.DBName)
 				}
 			case "sqlite":
-				if config.DefaultConfig.DBURL != "" {
-					connString = config.DefaultConfig.DBURL
-				} else {
-					connString = "file::memory:?cache=shared"
-				}
+				connString = "file::memory:?cache=shared"
 			default:
 				log.Fatalf("error: unsupported database: %v", config.DefaultConfig.DBDriver)
 			}
