@@ -2,8 +2,7 @@
 
 ```
 podman run -it -d -e POSTGRES_PASSWORD=postgres postgres:latest
-go run ./ -migrate -seed-path seed.sql -db-driver pgx
-go run ./ -path-prefix /api -app-name module-update-router -db-driver pgx -db-pass postgres -log-level debug
+go run ./ -path-prefix /api -app-name module-update-router -db-driver pgx -db-pass postgres -log-level debug -seed-path seed.sql
 ```
 
 # Send HTTP requests

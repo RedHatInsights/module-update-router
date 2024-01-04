@@ -28,164 +28,122 @@ func main() {
 		Options: []ff.Option{
 			ff.WithEnvVarNoPrefix(),
 		},
-		Subcommands: []*ffcli.Command{
-			{
-				Name:      "migrate",
-				ShortHelp: "run database migration",
-				FlagSet: func() *flag.FlagSet {
-					fs := flag.NewFlagSet("migrate", flag.ExitOnError)
+		Exec: func(ctx context.Context, args []string) error {
+			switch config.DefaultConfig.LogFormat.Value {
+			case "json":
+				log.SetFormatter(&log.JSONFormatter{})
+			default:
+				log.SetFormatter(&log.TextFormatter{})
+			}
 
-					fs.Var(&config.DefaultConfig.SeedPath, "seed-path", "path to the SQL seed file")
-					fs.BoolVar(&config.DefaultConfig.Reset, "reset", config.DefaultConfig.Reset, "drop all tables before running migrations")
+			lvl, err := log.ParseLevel(config.DefaultConfig.LogLevel)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.SetLevel(lvl)
+			log.SetReportCaller(true)
 
-					return fs
-				}(),
-				Options: []ff.Option{
-					ff.WithEnvVarNoPrefix(),
-				},
-				Exec: func(ctx context.Context, args []string) error {
-					log.Debug("running migrations")
-					if err := db.Migrate(config.DefaultConfig.Reset); err != nil {
-						return err
-					}
-					log.Debug("migrations complete")
+			log.Debugf("%+v", config.DefaultConfig)
 
-					if config.DefaultConfig.SeedPath.Value != "" {
-						log.Debug("seeding database")
-						if err := db.Seed(config.DefaultConfig.SeedPath.Value); err != nil {
-							return err
-						}
-						log.Debug("seed complete")
-					}
-					return nil
-				},
-			},
-			{
-				Name:      "http-api",
-				ShortHelp: "run HTTP services",
-				Options: []ff.Option{
-					ff.WithEnvVarNoPrefix(),
-				},
-				FlagSet: func() *flag.FlagSet {
-					fs := flag.NewFlagSet("http-api", flag.ExitOnError)
+			var connString string
+			switch config.DefaultConfig.DBDriver.Value {
+			case "pgx":
+				if config.DefaultConfig.DBURL != "" {
+					connString = config.DefaultConfig.DBURL
+				} else {
+					connString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
+						config.DefaultConfig.DBUser, config.DefaultConfig.DBPass, config.DefaultConfig.DBHost, config.DefaultConfig.DBPort, config.DefaultConfig.DBName)
+				}
+			case "sqlite":
+				if config.DefaultConfig.DBURL != "" {
+					connString = config.DefaultConfig.DBURL
+				} else {
+					connString = "file::memory:?cache=shared"
+				}
+			default:
+				log.Fatalf("error: unsupported database: %v", config.DefaultConfig.DBDriver)
+			}
 
-					fs.StringVar(&config.DefaultConfig.Addr, "addr", config.DefaultConfig.Addr, "app listen address")
-					fs.StringVar(&config.DefaultConfig.APIVersion, "api-version", config.DefaultConfig.APIVersion, "version to use in the URL path")
-					fs.StringVar(&config.DefaultConfig.AppName, "app-name", config.DefaultConfig.AppName, "name component for the API prefix")
-					fs.IntVar(&config.DefaultConfig.EventBuffer, "event-buffer", config.DefaultConfig.EventBuffer, "the size of the event channel buffer")
-					fs.StringVar(&config.DefaultConfig.MAddr, "maddr", config.DefaultConfig.MAddr, "metrics listen address")
-					fs.StringVar(&config.DefaultConfig.MetricsTopic, "metrics-topic", config.DefaultConfig.MetricsTopic, "topic on which to place metrics data")
-					fs.StringVar(&config.DefaultConfig.PathPrefix, "path-prefix", config.DefaultConfig.PathPrefix, "API path prefix")
+			db, err = Open(config.DefaultConfig.DBDriver.Value, connString)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer db.Close()
 
-					return fs
-				}(),
-				Exec: func(ctx context.Context, args []string) error {
-					apiroots := strings.Split(config.DefaultConfig.PathPrefix, ",")
-					for i, root := range apiroots {
-						apiroots[i] = path.Join(root, config.DefaultConfig.AppName, config.DefaultConfig.APIVersion)
-					}
+			log.Debug("running migrations")
+			if err := db.Migrate(config.DefaultConfig.Reset); err != nil {
+				return err
+			}
+			log.Debug("migrations complete")
 
-					srv, err := NewServer(config.DefaultConfig.Addr, apiroots, db)
+			if config.DefaultConfig.SeedPath.Value != "" {
+				log.Debug("seeding database")
+				if err := db.Seed(config.DefaultConfig.SeedPath.Value); err != nil {
+					return err
+				}
+				log.Debug("seed complete")
+			}
+
+			apiroots := strings.Split(config.DefaultConfig.PathPrefix, ",")
+			for i, root := range apiroots {
+				apiroots[i] = path.Join(root, config.DefaultConfig.AppName, config.DefaultConfig.APIVersion)
+			}
+
+			srv, err := NewServer(config.DefaultConfig.Addr, apiroots, db)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer srv.Close()
+
+			go func() {
+				log.WithFields(log.Fields{
+					"routine": "db_trim",
+				}).Info("started database trimmer")
+				for {
+					rows, err := db.DeleteEvents(time.Now().UTC().Add(-30 * 24 * time.Hour))
 					if err != nil {
-						log.Fatal(err)
-					}
-					defer srv.Close()
-
-					go func() {
 						log.WithFields(log.Fields{
 							"routine": "db_trim",
-						}).Info("started database trimmer")
-						for {
-							rows, err := db.DeleteEvents(time.Now().UTC().Add(-30 * 24 * time.Hour))
-							if err != nil {
-								log.WithFields(log.Fields{
-									"routine": "db_trim",
-									"error":   err,
-								}).Error("deleting events")
-							}
-							log.WithFields(log.Fields{
-								"routine": "db_trim",
-								"rows":    rows,
-							}).Info("deleted rows")
-							time.Sleep(1 * time.Hour)
-						}
-					}()
+							"error":   err,
+						}).Error("deleting events")
+					}
+					log.WithFields(log.Fields{
+						"routine": "db_trim",
+						"rows":    rows,
+					}).Info("deleted rows")
+					time.Sleep(1 * time.Hour)
+				}
+			}()
 
-					go func() {
-						log.WithFields(log.Fields{
-							"routine": "metrics",
-							"addr":    config.DefaultConfig.MAddr,
-						}).Info("started http listener")
-						if err := http.ListenAndServe(config.DefaultConfig.MAddr, promhttp.Handler()); err != nil {
-							log.Fatalf("error: failed to listen to addr (%v): %v", config.DefaultConfig.MAddr, err)
-						}
-					}()
+			go func() {
+				log.WithFields(log.Fields{
+					"routine": "metrics",
+					"addr":    config.DefaultConfig.MAddr,
+				}).Info("started http listener")
+				if err := http.ListenAndServe(config.DefaultConfig.MAddr, promhttp.Handler()); err != nil {
+					log.Fatalf("error: failed to listen to addr (%v): %v", config.DefaultConfig.MAddr, err)
+				}
+			}()
 
-					go func() {
-						log.WithFields(log.Fields{
-							"routine": "app",
-							"addr":    config.DefaultConfig.Addr,
-						}).Info("started http listener")
-						log.Fatal(srv.ListenAndServe())
-					}()
+			go func() {
+				log.WithFields(log.Fields{
+					"routine": "app",
+					"addr":    config.DefaultConfig.Addr,
+				}).Info("started http listener")
+				log.Fatal(srv.ListenAndServe())
+			}()
 
-					quit := make(chan os.Signal, 1)
-					signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-					<-quit
+			quit := make(chan os.Signal, 1)
+			signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+			<-quit
 
-					return nil
-				},
-			},
-		},
-		Exec: func(ctx context.Context, args []string) error {
-			return flag.ErrHelp
+			return nil
 		},
 	}
 
 	if err := root.Parse(os.Args[1:]); err != nil {
 		log.Fatalf("error: failed to parse flags: %v", err)
 	}
-
-	switch config.DefaultConfig.LogFormat.Value {
-	case "json":
-		log.SetFormatter(&log.JSONFormatter{})
-	default:
-		log.SetFormatter(&log.TextFormatter{})
-	}
-
-	lvl, err := log.ParseLevel(config.DefaultConfig.LogLevel)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.SetLevel(lvl)
-	log.SetReportCaller(true)
-
-	log.Debugf("%+v", config.DefaultConfig)
-
-	var connString string
-	switch config.DefaultConfig.DBDriver.Value {
-	case "pgx":
-		if config.DefaultConfig.DBURL != "" {
-			connString = config.DefaultConfig.DBURL
-		} else {
-			connString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
-				config.DefaultConfig.DBUser, config.DefaultConfig.DBPass, config.DefaultConfig.DBHost, config.DefaultConfig.DBPort, config.DefaultConfig.DBName)
-		}
-	case "sqlite":
-		if config.DefaultConfig.DBURL != "" {
-			connString = config.DefaultConfig.DBURL
-		} else {
-			connString = "file::memory:?cache=shared"
-		}
-	default:
-		log.Fatalf("error: unsupported database: %v", config.DefaultConfig.DBDriver)
-	}
-
-	db, err = Open(config.DefaultConfig.DBDriver.Value, connString)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
 	if err := root.Run(context.Background()); err != nil {
 		log.Fatalf("error: cannot execute command: %v", err)
