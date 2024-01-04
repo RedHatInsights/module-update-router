@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -45,22 +44,7 @@ func main() {
 
 			log.Debugf("%+v", config.DefaultConfig)
 
-			var connString string
-			switch config.DefaultConfig.DBDriver.Value {
-			case "pgx":
-				if config.DefaultConfig.DBURL != "" {
-					connString = config.DefaultConfig.DBURL
-				} else {
-					connString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
-						config.DefaultConfig.DBUser, config.DefaultConfig.DBPass, config.DefaultConfig.DBHost, config.DefaultConfig.DBPort, config.DefaultConfig.DBName)
-				}
-			case "sqlite":
-				connString = "file::memory:?cache=shared"
-			default:
-				log.Fatalf("error: unsupported database: %v", config.DefaultConfig.DBDriver)
-			}
-
-			db, err = Open(config.DefaultConfig.DBDriver.Value, connString)
+			db, err = Open("sqlite", "file::memory:?cache=shared")
 			if err != nil {
 				log.Fatal(err)
 			}

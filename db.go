@@ -8,14 +8,11 @@ import (
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "modernc.org/sqlite"
 )
 
@@ -31,10 +28,7 @@ type DB struct {
 }
 
 // Open opens a database specified by dataSourceName. The only supported driver
-// types are "sqlite" or "pgx".
-//
-// Open adheres to all database/sql driver expectations. For example, it is an
-// error to request a dataSourceName of ":memory:" with the "sqlite" driver.
+// types are "sqlite".
 func Open(driverName, dataSourceName string) (*DB, error) {
 	handle, err := sqlx.Open(driverName, dataSourceName)
 	if err != nil {
@@ -262,19 +256,9 @@ func (db *DB) preparedStatement(query string) (*sqlx.Stmt, error) {
 }
 
 func newMigrate(db *sql.DB, driverName string) (*migrate.Migrate, error) {
-	var driver database.Driver
-	var err error
-	switch driverName {
-	case "pgx":
-		driver, err = postgres.WithInstance(db, &postgres.Config{})
-		if err != nil {
-			return nil, fmt.Errorf("db: postgres.WithInstance failed: %w", err)
-		}
-	case "sqlite":
-		driver, err = sqlite.WithInstance(db, &sqlite.Config{})
-		if err != nil {
-			return nil, fmt.Errorf("db: sqlite.WithInstance failed: %w", err)
-		}
+	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("db: sqlite.WithInstance failed: %w", err)
 	}
 
 	source, err := iofs.New(migrations, "migrations")
