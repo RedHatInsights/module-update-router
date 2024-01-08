@@ -10,7 +10,7 @@ require (
 	github.com/peterbourgon/ff/v3 v3.4.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/redhatinsights/app-common-go v1.6.7
-	github.com/redhatinsights/platform-go-middlewares v0.20.0
+	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sgreben/flagvar v1.10.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slok/go-http-metrics v0.11.0
