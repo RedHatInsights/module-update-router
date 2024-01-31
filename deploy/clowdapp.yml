@@ -11,9 +11,6 @@ objects:
       testing:
         iqePlugin: module-update-router
       envName: ${ENV_NAME}
-      database:
-        name: module-update-router
-        version: 12
       deployments:
         - name: service
           minReplicas: ${{MIN_REPLICAS}}
