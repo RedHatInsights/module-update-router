@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/redhatinsights/module-update-router/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/slok/go-http-metrics/metrics"
@@ -17,7 +18,7 @@ import (
 	"github.com/slok/go-http-metrics/middleware"
 	"github.com/slok/go-http-metrics/middleware/std"
 
-	request "github.com/redhatinsights/platform-go-middlewares/request_id"
+	request "github.com/redhatinsights/platform-go-middlewares/v2/request_id"
 )
 
 var r metrics.Recorder = httpmetrics.NewRecorder(httpmetrics.Config{})
@@ -104,11 +105,7 @@ func (s *Server) handleChannel() http.HandlerFunc {
 		resp := response{
 			URL: "/release",
 		}
-		id, err := identity.GetIdentity(r)
-		if err != nil {
-			formatJSONError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+		id := identity.GetIdentity(r.Context())
 		if id.Identity.OrgID == "" {
 			formatJSONError(w, http.StatusBadRequest, "missing org_id identity field")
 			return
@@ -140,12 +137,9 @@ func (s *Server) handleEvent() http.HandlerFunc {
 		case http.MethodPost:
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
-			id, err := identity.GetIdentity(r)
-			if err != nil {
-				formatJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-			if *id.Identity.Type != "Associate" {
+			id := identity.GetIdentity(r.Context())
+
+			if id.Identity.Type != "Associate" {
 				formatJSONError(w, http.StatusUnauthorized, "")
 				return
 			}
@@ -252,7 +246,12 @@ func (s *Server) requestID(next http.HandlerFunc) http.HandlerFunc {
 // X-Rh-Identity header is present in the request.
 func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		identity.Identify(next).ServeHTTP(w, r)
+		identity.EnforceIdentityWithLogger(func(ctx context.Context, rawIdentity, message string) {
+			log.WithFields(log.Fields{
+				"identity": rawIdentity,
+				"message":  message,
+			}).Log(log.InfoLevel)
+		})(next).ServeHTTP(w, r)
 	}
 }
 
