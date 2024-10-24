@@ -61,7 +61,7 @@ parameters:
   - name: ENV_NAME
     required: true
   - name: IMAGE
-    value: quay.io/cloudservices/module-update-router
+    value: quay.io/redhat-services-prod/insights-management-tenant/insights-module-update-router/module-update-router
     required: true
   - name: IMAGE_TAG
     required: true
