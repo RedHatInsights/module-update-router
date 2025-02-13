@@ -2,7 +2,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/redhatinsights/module-update-router)](https://goreportcard.com/report/github.com/redhatinsights/module-update-router)
 [![codecov](https://codecov.io/gh/RedHatInsights/module-update-router/branch/master/graph/badge.svg?token=HASAINK5Q3)](https://codecov.io/gh/RedHatInsights/module-update-router)
 
-module-update-router is a microservice that determines whether a client should
+module-update-router is  a microservice that determines whether a client should
 fetch a testing/prerelease module or a released/production module. It maintains
 a list of account IDs internally and will respond to GET requests to `/api/v1/channel?module=<module-name>`
 (for example, `insights-core`) with an appropriate URL fragment (either 
