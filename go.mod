@@ -1,6 +1,8 @@
 module github.com/redhatinsights/module-update-router
 
-go 1.20
+go 1.23
+
+toolchain go1.23.6
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
@@ -13,7 +15,7 @@ require (
 	github.com/redhatinsights/platform-go-middlewares/v2 v2.0.0-beta.2
 	github.com/sgreben/flagvar v1.10.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/slok/go-http-metrics v0.11.0
+	github.com/slok/go-http-metrics v0.13.0
 	modernc.org/sqlite v1.29.6
 )
 
@@ -30,11 +32,11 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.59.1 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
 	modernc.org/libc v1.41.0 // indirect
