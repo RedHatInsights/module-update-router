@@ -1,6 +1,6 @@
 module github.com/redhatinsights/module-update-router
 
-go 1.20
+go 1.23
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
@@ -14,7 +14,7 @@ require (
 	github.com/sgreben/flagvar v1.10.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slok/go-http-metrics v0.11.0
-	modernc.org/sqlite v1.29.6
+	modernc.org/sqlite v1.36.0
 )
 
 require (
