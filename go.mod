@@ -1,6 +1,8 @@
 module github.com/redhatinsights/module-update-router
 
-go 1.21
+go 1.23.0
+
+toolchain go1.23.8
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
@@ -36,10 +38,10 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
-	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
+	modernc.org/gc/v3 v3.1.0 // indirect
 	modernc.org/libc v1.41.0 // indirect
-	modernc.org/mathutil v1.6.0 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.7.2 // indirect
-	modernc.org/strutil v1.2.0 // indirect
+	modernc.org/strutil v1.2.1 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
