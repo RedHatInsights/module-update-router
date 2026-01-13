@@ -14,7 +14,7 @@ require (
 	github.com/sgreben/flagvar v1.10.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slok/go-http-metrics v0.13.0
-	modernc.org/sqlite v1.41.0
+	modernc.org/sqlite v1.43.0
 )
 
 require (
