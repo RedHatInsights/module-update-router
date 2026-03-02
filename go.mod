@@ -12,7 +12,7 @@ require (
 	github.com/redhatinsights/app-common-go v1.6.9
 	github.com/redhatinsights/platform-go-middlewares/v2 v2.0.0
 	github.com/sgreben/flagvar v1.10.2
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/slok/go-http-metrics v0.13.0
 	modernc.org/sqlite v1.41.0
 )
