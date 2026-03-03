@@ -34,7 +34,7 @@ FORK_ID=$(ht GET https://gitlab.cee.redhat.com/api/v4/projects/13582/forks?owned
 
 if [ "${FORK_ID}" == "null" ]; then
     FORK_ID=$(ht POST https://gitlab.cee.redhat.com/api/v4/projects/13582/fork "PRIVATE-TOKEN:${GITLAB_TOKEN}" | jq '.id')
-    
+
     while [ "$(ht GET "https://gitlab.cee.redhat.com/api/v4/projects/${FORK_ID}" "PRIVATE-TOKEN:${GITLAB_TOKEN}" | jq -r '.import_status')" != "finished" ]; do
         sleep 2
     done
@@ -65,4 +65,5 @@ ht POST https://gitlab.cee.redhat.com/api/v4/projects/"${FORK_ID}"/merge_request
     title="deploy(${PROJECT_NAME}): release ${SHORT_REF} to production" \
     description="\`\`\`${DESCRIPTION}\`\`\`" \
     remove_source_branch=true | jq -r .web_url
+
 rm -rf "${TMPDIR}"
