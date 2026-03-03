@@ -114,7 +114,11 @@ func TestRouter(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Close()
+			defer func() {
+				if err := db.Close(); err != nil {
+					t.Fatal(err)
+				}
+			}()
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
@@ -134,7 +138,11 @@ func TestRouter(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer srv.Close()
+			defer func() {
+				if err := srv.Close(); err != nil {
+					t.Fatal(err)
+				}
+			}()
 
 			reader := strings.NewReader(test.input.body)
 			req := httptest.NewRequest(test.input.method, test.input.url, reader)
