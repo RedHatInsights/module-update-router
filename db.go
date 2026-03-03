@@ -14,6 +14,8 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	_ "modernc.org/sqlite"
+
+	log "github.com/sirupsen/logrus"
 )
 
 //go:embed migrations
@@ -50,7 +52,9 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 // connection pool.
 func (db *DB) Close() error {
 	for _, stmt := range db.statements {
-		stmt.Close()
+		if err := stmt.Close(); err != nil {
+			fmt.Printf("Error closing stmt: %v", err)
+		}
 	}
 	return db.handle.Close()
 }
@@ -139,7 +143,11 @@ func (db *DB) GetEvents(limit int, offset int) ([]map[string]interface{}, error)
 	if err != nil {
 		return nil, fmt.Errorf("db: stmt.Queryx failed: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.WithError(err).Error("closing rows in GetEvents")
+		}
+	}()
 
 	events := make([]map[string]interface{}, 0)
 	for rows.Next() {
