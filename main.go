@@ -47,7 +47,11 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer db.Close()
+			defer func() {
+				if err := db.Close(); err != nil {
+					log.Error(err)
+				}
+			}()
 
 			log.Debug("running migrations")
 			if err := db.Migrate(config.DefaultConfig.Reset); err != nil {
@@ -72,7 +76,11 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer srv.Close()
+			defer func() {
+				if err := srv.Close(); err != nil {
+					log.Error(err)
+				}
+			}()
 
 			go func() {
 				log.WithFields(log.Fields{
