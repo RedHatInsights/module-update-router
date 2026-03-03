@@ -10,6 +10,12 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
+func closeDB(d *DB, t *testing.T) {
+    if err := d.Close(); err != nil {
+        t.Error(err)
+    }
+}
+
 func TestDBCount(t *testing.T) {
 	tests := []struct {
 		desc  string
@@ -29,7 +35,7 @@ func TestDBCount(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Close()
+			defer closeDB(db, t)
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
@@ -98,7 +104,7 @@ func TestDBInsertEvents(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Close()
+			defer closeDB(db, t)
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
@@ -213,7 +219,7 @@ func TestDBGetEvents(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Close()
+			defer closeDB(db, t)
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
@@ -295,7 +301,7 @@ func TestDeleteEvents(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Close()
+			defer closeDB(db, t)
 			if err := db.Migrate(false); err != nil {
 				t.Fatal(err)
 			}
