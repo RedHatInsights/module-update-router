@@ -19,7 +19,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - run: go mod download
-      - uses: aevea/commitsar@v1.0.2
+      - uses: aevea/commitsar@v1.0.3
   lint-code:
     runs-on: ubuntu-latest
     steps:
