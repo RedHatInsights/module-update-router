@@ -1,0 +1,133 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "module-update-router",
+        "description": "Module Update Router for Insights Core Egg",
+        "version": "1.0"
+    },
+    "tags": [
+        {
+            "name": "mur",
+            "description": "MUR API endpoint"
+        }
+    ],
+    "servers": [
+        {
+            "url": "https://cloud.redhat.com/api/module-update-router/v1",
+            "description": "Production"
+        }
+    ],
+    "paths": {
+        "/channel": {
+            "get": {
+                "summary": "Request a channel",
+                "tags": [
+                    "mur"
+                ],
+                "operationId": "get-channel",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "example-release": {
+                                        "value": {
+                                            "url": "/release"
+                                        }
+                                    },
+                                    "example-testing": {
+                                        "value": {
+                                            "url": "/testing"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "module",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/event": {
+            "post": {
+                "summary": "Submit a run event",
+                "tags": [
+                    "mur"
+                ],
+                "operationId": "post-event",
+                "responses": {
+                    "201": {
+                        "description": "CREATED"
+                    }
+                },
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "phase",
+                                    "started_at",
+                                    "exit",
+                                    "ended_at",
+                                    "machine_id",
+                                    "core_version"
+                                ],
+                                "properties": {
+                                    "phase": {
+                                        "type": "string"
+                                    },
+                                    "started_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2006-01-02T15:04:05+00:00"
+                                    },
+                                    "exit": {
+                                        "type": "integer"
+                                    },
+                                    "exception": {
+                                        "type": "string"
+                                    },
+                                    "ended_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2006-01-02T15:04:05+00:00"
+                                    },
+                                    "machine_id": {
+                                        "type": "string"
+                                    },
+                                    "core_version": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {},
+        "securitySchemes": {}
+    }
+}
