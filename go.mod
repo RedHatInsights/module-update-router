@@ -14,7 +14,7 @@ require (
 	github.com/sgreben/flagvar v1.10.2
 	github.com/sirupsen/logrus v1.9.4
 	github.com/slok/go-http-metrics v0.13.0
-	modernc.org/sqlite v1.46.2
+	modernc.org/sqlite v1.48.1
 )
 
 require (
@@ -22,7 +22,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/klauspost/compress v1.18.4 // indirect
+	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
