@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -20,6 +21,9 @@ import (
 
 	request "github.com/redhatinsights/platform-go-middlewares/v2/request_id"
 )
+
+//go:embed openapi.json
+var openAPISpec []byte
 
 var r metrics.Recorder = httpmetrics.NewRecorder(httpmetrics.Config{})
 
@@ -63,6 +67,7 @@ func (s *Server) Close() error {
 func (s *Server) routes(prefixes ...string) {
 	s.mux.HandleFunc("/ping", s.handlePing())
 	for _, prefix := range prefixes {
+		s.mux.HandleFunc(path.Join(prefix, "openapi.json"), s.handleOpenAPI())
 		s.mux.HandleFunc(prefix+"/", s.metrics(s.requestID(s.log(s.auth(s.handleAPI(prefix))))))
 	}
 }
@@ -72,6 +77,16 @@ func (s *Server) routes(prefixes ...string) {
 func (s *Server) handlePing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, err := w.Write([]byte(`OK`)); err != nil {
+			log.Errorf("cannot write HTTP response: %v", err)
+		}
+	}
+}
+
+// handleOpenAPI creates an http.HandlerFunc that serves the openapi.json spec.
+func (s *Server) handleOpenAPI() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if _, err := w.Write(openAPISpec); err != nil {
 			log.Errorf("cannot write HTTP response: %v", err)
 		}
 	}

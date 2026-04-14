@@ -31,6 +31,11 @@ func TestRouter(t *testing.T) {
 			want:  response{http.StatusOK, "OK"},
 		},
 		{
+			desc:  "GET /openapi.json - want openapi spec",
+			input: request{http.MethodGet, "/api/module-update-router/v1/openapi.json", "", nil},
+			want:  response{http.StatusOK, string(openAPISpec)},
+		},
+		{
 			desc:  "GET /channel - want /testing",
 			input: request{http.MethodGet, "/api/module-update-router/v1/channel?module=insights-core", "", map[string]string{"X-Rh-Identity": base64.StdEncoding.EncodeToString([]byte(`{ "identity": { "org_id": "1979710", "account_number": "540155", "type": "User", "internal": { "org_id": "1979710" } } }`))}},
 			want:  response{http.StatusOK, `{"url":"/testing"}`},
