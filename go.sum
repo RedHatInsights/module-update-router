@@ -72,8 +72,8 @@ github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjR
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/sgreben/flagvar v1.10.2 h1:TNEuTXpTha4ERVcFk9m/8DhXALINha6d13FYoqVoJSM=
 github.com/sgreben/flagvar v1.10.2/go.mod h1:sMiA3dViOfFVv/VRLfWo5szYIOD3ZRYVLrwh9E8tHLs=
-github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=
-github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC42RjbV2g=
+github.com/sirupsen/logrus v1.10.0 h1:T8MxJJXVZkfcC5zSRMRAg2F8+lxjmUCGGWPzFxO+Msc=
+github.com/sirupsen/logrus v1.10.0/go.mod h1:FXZFonkDAnFozmO+5hGAFvB0Yg9/j2SIhA/QuIkP180=
 github.com/slok/go-http-metrics v0.13.0 h1:lQDyJJx9wKhmbliyUsZ2l6peGnXRHjsjoqPt5VYzcP8=
 github.com/slok/go-http-metrics v0.13.0/go.mod h1:HIr7t/HbN2sJaunvnt9wKP9xoBBVZFo1/KiHU3b0w+4=
 github.com/stretchr/objx v0.5.2 h1:xuMeJ0Sdp5ZMRXx/aWO6RZxdr3beISkG5/G/aIRr3pY=
